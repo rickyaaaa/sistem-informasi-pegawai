@@ -16,6 +16,10 @@
                         {{ __('Dashboard') }}
                     </x-nav-link>
 
+                    <x-nav-link :href="route('pegawai.index')" :active="request()->routeIs('pegawai.*')">
+                        {{ __('Pegawai') }}
+                    </x-nav-link>
+
                     @if(auth()->user()?->isSuperAdmin())
                         <x-nav-link :href="route('satker.index')" :active="request()->routeIs('satker.*')">
                             {{ __('Satker') }}
@@ -76,6 +80,10 @@
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
+
+                <x-responsive-nav-link :href="route('pegawai.index')" :active="request()->routeIs('pegawai.*')">
+                    {{ __('Pegawai') }}
+                </x-responsive-nav-link>
 
                 @if(auth()->user()?->isSuperAdmin())
                     <x-responsive-nav-link :href="route('satker.index')" :active="request()->routeIs('satker.*')">

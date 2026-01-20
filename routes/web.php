@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PegawaiController;
 use App\Http\Controllers\SatkerController;
 use Illuminate\Support\Facades\Route;
 
@@ -20,6 +21,11 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware(['auth', 'role:super_admin'])->group(function () {
     Route::resource('satker', SatkerController::class)
+        ->except(['show']);
+});
+
+Route::middleware(['auth', 'role:super_admin,admin_satker'])->group(function () {
+    Route::resource('pegawai', PegawaiController::class)
         ->except(['show']);
 });
 
