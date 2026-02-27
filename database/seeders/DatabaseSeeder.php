@@ -26,7 +26,7 @@ class DatabaseSeeder extends Seeder
         // Default credentials for local development / thesis demo.
         // Change these values in production.
         User::query()->firstOrCreate(
-            ['email' => 'superadmin@example.com'],
+            ['username' => 'superadmin'],
             [
                 'name' => 'Super Admin',
                 'password' => Hash::make('password'),
@@ -35,11 +35,11 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        // Sample admin satker account.
+        // Sample operator account.
         User::query()->firstOrCreate(
-            ['email' => 'admin.umum@example.com'],
+            ['username' => 'operator.umum'],
             [
-                'name' => 'Admin Satker Umum',
+                'name' => 'Operator Satker Umum',
                 'password' => Hash::make('password'),
                 'role' => User::ROLE_ADMIN_SATKER,
                 'satker_id' => $satkerUmum->id,

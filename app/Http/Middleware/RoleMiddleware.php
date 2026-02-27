@@ -28,6 +28,16 @@ class RoleMiddleware
             abort(401);
         }
 
+        // Block inactive users — log them out cleanly
+        if (isset($user->status) && $user->status === 'inactive') {
+            auth()->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return redirect()->route('login')
+                ->withErrors(['username' => 'Akun Anda telah dinonaktifkan. Hubungi administrator.']);
+        }
+
         if ($roles !== [] && ! in_array($user->role, $roles, true)) {
             abort(403, 'Anda tidak memiliki akses.');
         }

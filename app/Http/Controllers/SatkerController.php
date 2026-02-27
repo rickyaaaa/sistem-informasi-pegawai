@@ -8,16 +8,12 @@ use Illuminate\Http\Request;
 class SatkerController extends Controller
 {
     public function index()
-    {
-        $satkers = Satker::query()
-            ->orderBy('nama_satker')
-            ->paginate(10)
-            ->withQueryString();
+{
+    $satkers = Satker::orderBy('nama_satker')
+        ->paginate(10);
 
-        return view('satker.index', [
-            'satkers' => $satkers,
-        ]);
-    }
+    return view('satker.index', compact('satkers'));
+}
 
     public function create()
     {
