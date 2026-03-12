@@ -1,0 +1,365 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Pegawai;
+use App\Models\PegawaiRequest;
+use App\Models\Satker;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use App\Exports\PegawaiExport;
+use Maatwebsite\Excel\Facades\Excel;
+
+class PegawaiController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+    public function index(Request $request)
+    {
+        $user = $request->user();
+
+        $query = Pegawai::query()->with('satker');
+
+        // Both roles can filter by satker
+        if ($request->filled('satker_id')) {
+            $query->where('satker_id', (int) $request->input('satker_id'));
+        }
+
+        // Search nama / NIK
+        if ($request->filled('q')) {
+            $q = trim((string) $request->input('q'));
+            $query->where(function ($sub) use ($q) {
+                $sub->where('nama', 'like', "%{$q}%")
+                    ->orWhere('nik', 'like', "%{$q}%");
+            });
+        }
+
+        $pegawais = $query
+            ->orderBy('nama')
+            ->paginate(10)
+            ->withQueryString();
+
+        // Both roles get the satker list for the filter dropdown
+        $satkers = Satker::orderBy('nama_satker')->get();
+
+        return view('pegawai.index', [
+            'pegawais'         => $pegawais,
+            'satkers'          => $satkers,
+            'selectedSatkerId' => $request->input('satker_id'),
+            'q'                => $request->input('q'),
+        ]);
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        $user = auth()->user();
+
+        return view('pegawai.create', [
+            'satkers' => Satker::orderBy('nama_satker')->get(),
+            'user'    => $user,
+        ]);
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * - super_admin  → direct insert to pegawais
+     * - admin_satker → create PegawaiRequest (pending)
+     */
+    public function store(Request $request)
+    {
+        $user = $request->user();
+
+        $validated = $request->validate([
+            'nama'       => ['required', 'string', 'max:255'],
+            'nik'        => ['required', 'string', 'max:50', 'unique:pegawais,nik'],
+            'jenis_kelamin' => ['required', 'string', 'in:Laki-laki,Perempuan'],
+            'pendidikan' => ['required', 'string', 'in:SD,SMP,SMA,D1,D2,D3,S1,S1 Profesi,S2,S2 Profesi'],
+            'satker_id'  => ['nullable', 'integer', 'exists:satkers,id'],
+            'status'     => ['required', 'in:aktif,non_aktif'],
+            'foto'       => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
+            'file_ktp'   => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:2048'],
+            'file_kk'    => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:2048'],
+        ]);
+
+        // Determine satker_id
+        if ($user->isAdminSatker()) {
+            $validated['satker_id'] = $user->satker_id;
+        } elseif (empty($validated['satker_id'])) {
+            return back()
+                ->withErrors(['satker_id' => 'Satker wajib dipilih.'])
+                ->withInput();
+        }
+
+        // Upload files (done ahead of time so path is stored in payload)
+        if ($request->hasFile('foto')) {
+            $validated['foto'] = $request->file('foto')
+                ->store('pegawai/foto', 'public');
+        } else {
+            unset($validated['foto']);
+        }
+        if ($request->hasFile('file_ktp')) {
+            $validated['file_ktp'] = $request->file('file_ktp')
+                ->store('pegawai/ktp', 'public');
+        } else {
+            unset($validated['file_ktp']);
+        }
+        if ($request->hasFile('file_kk')) {
+            $validated['file_kk'] = $request->file('file_kk')
+                ->store('pegawai/kk', 'public');
+        } else {
+            unset($validated['file_kk']);
+        }
+
+        // ── Super admin: direct insert ──────────────────────────
+        if ($user->isSuperAdmin()) {
+            Pegawai::create($validated);
+
+            return redirect()
+                ->route('pegawai.index')
+                ->with('success', 'Pegawai berhasil ditambahkan.');
+        }
+
+        // ── Admin satker: submit for approval ───────────────────
+        PegawaiRequest::create([
+            'pegawai_id'   => null,
+            'satker_id'    => $validated['satker_id'],
+            'requested_by' => $user->id,
+            'action_type'  => 'create',
+            'data_payload' => $validated,
+            'status'       => 'pending',
+        ]);
+
+        return redirect()
+            ->route('pegawai.index')
+            ->with('success', 'Permintaan tambah pegawai telah dikirim dan menunggu persetujuan.');
+    }
+
+    /**
+     * Display the specified resource (detail profile).
+     */
+    public function show(Pegawai $pegawai)
+    {
+        $user = auth()->user();
+
+        if ($user->isAdminSatker() && $pegawai->satker_id !== $user->satker_id) {
+            abort(403);
+        }
+
+        return view('pegawai.show', [
+            'pegawai' => $pegawai->load('satker'),
+        ]);
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(Pegawai $pegawai)
+    {
+        $user = auth()->user();
+
+        if ($user->isAdminSatker() && $pegawai->satker_id !== $user->satker_id) {
+            abort(403);
+        }
+
+        return view('pegawai.edit', [
+            'pegawai' => $pegawai->load('satker'),
+            'satkers' => Satker::orderBy('nama_satker')->get(),
+            'user'    => $user,
+        ]);
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * - super_admin  → direct update
+     * - admin_satker → create PegawaiRequest (pending)
+     */
+    public function update(Request $request, Pegawai $pegawai)
+    {
+        $user = $request->user();
+
+        if ($user->isAdminSatker() && $pegawai->satker_id !== $user->satker_id) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'nama'       => ['required', 'string', 'max:255'],
+            'nik'        => ['required', 'string', 'max:50', 'unique:pegawais,nik,' . $pegawai->id],
+            'jenis_kelamin' => ['required', 'string', 'in:Laki-laki,Perempuan'],
+            'pendidikan' => ['required', 'string', 'in:SD,SMP,SMA,D1,D2,D3,S1,S1 Profesi,S2,S2 Profesi'],
+            'satker_id'  => ['nullable', 'integer', 'exists:satkers,id'],
+            'status'     => ['required', 'in:aktif,non_aktif'],
+            'foto'       => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
+            'file_ktp'   => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:2048'],
+            'file_kk'    => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:2048'],
+        ]);
+
+        if ($user->isAdminSatker()) {
+            $validated['satker_id'] = $user->satker_id;
+        } elseif (empty($validated['satker_id'])) {
+            return back()
+                ->withErrors(['satker_id' => 'Satker wajib dipilih.'])
+                ->withInput();
+        }
+
+        // Upload files
+        if ($request->hasFile('foto')) {
+            // Delete old foto if exists
+            if ($pegawai->foto && Storage::disk('public')->exists($pegawai->foto)) {
+                Storage::disk('public')->delete($pegawai->foto);
+            }
+            $validated['foto'] = $request->file('foto')
+                ->store('pegawai/foto', 'public');
+        } else {
+            unset($validated['foto']);
+        }
+        if ($request->hasFile('file_ktp')) {
+            $validated['file_ktp'] = $request->file('file_ktp')
+                ->store('pegawai/ktp', 'public');
+        } else {
+            unset($validated['file_ktp']);
+        }
+        if ($request->hasFile('file_kk')) {
+            $validated['file_kk'] = $request->file('file_kk')
+                ->store('pegawai/kk', 'public');
+        } else {
+            unset($validated['file_kk']);
+        }
+
+        // Determine redirect target (back to show page if coming from there)
+        $redirectBack = $request->has('_redirect_show');
+
+        // ── Super admin: direct update ──────────────────────────
+        if ($user->isSuperAdmin()) {
+            $pegawai->update($validated);
+
+            $route = $redirectBack
+                ? route('pegawai.show', $pegawai)
+                : route('pegawai.index');
+
+            return redirect($route)
+                ->with('success', 'Pegawai berhasil diperbarui.');
+        }
+
+        // ── Admin satker: submit for approval ───────────────────
+        PegawaiRequest::create([
+            'pegawai_id'   => $pegawai->id,
+            'satker_id'    => $validated['satker_id'],
+            'requested_by' => $user->id,
+            'action_type'  => 'update',
+            'data_payload' => $validated,
+            'status'       => 'pending',
+        ]);
+
+        $route = $redirectBack
+            ? route('pegawai.show', $pegawai)
+            : route('pegawai.index');
+
+        return redirect($route)
+            ->with('success', 'Permintaan ubah data pegawai telah dikirim dan menunggu persetujuan.');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * - super_admin  → soft delete
+     * - admin_satker → create PegawaiRequest (pending)
+     */
+    public function destroy(Pegawai $pegawai)
+    {
+        $user = auth()->user();
+
+        if ($user->isAdminSatker() && $pegawai->satker_id !== $user->satker_id) {
+            abort(403);
+        }
+
+        // ── Super admin: direct soft delete ─────────────────────
+        if ($user->isSuperAdmin()) {
+            $pegawai->delete();
+
+            return redirect()
+                ->route('pegawai.index')
+                ->with('success', 'Pegawai berhasil dihapus.');
+        }
+
+        // ── Admin satker: submit for approval ───────────────────
+        PegawaiRequest::create([
+            'pegawai_id'   => $pegawai->id,
+            'satker_id'    => $pegawai->satker_id,
+            'requested_by' => $user->id,
+            'action_type'  => 'delete',
+            'data_payload' => ['nama' => $pegawai->nama, 'nik' => $pegawai->nik],
+            'status'       => 'pending',
+        ]);
+
+        return redirect()
+            ->route('pegawai.index')
+            ->with('success', 'Permintaan hapus pegawai telah dikirim dan menunggu persetujuan.');
+    }
+
+    /**
+     * Preview file KTP / KK
+     */
+    public function showFile(Pegawai $pegawai, string $type)
+    {
+        $user = auth()->user();
+
+        if ($user->isAdminSatker() && $pegawai->satker_id !== $user->satker_id) {
+            abort(403);
+        }
+
+        if (!in_array($type, ['ktp', 'kk'])) {
+            abort(404);
+        }
+
+        $path = $type === 'ktp' ? $pegawai->file_ktp : $pegawai->file_kk;
+
+        if (!$path || !Storage::disk('public')->exists($path)) {
+            abort(404);
+        }
+
+        return response()->file(
+            storage_path('app/public/' . $path)
+        );
+    }
+
+    /**
+     * Download file KTP / KK
+     */
+    public function downloadFile(Pegawai $pegawai, string $type)
+    {
+        $user = auth()->user();
+
+        if ($user->isAdminSatker() && $pegawai->satker_id !== $user->satker_id) {
+            abort(403);
+        }
+
+        if (!in_array($type, ['ktp', 'kk'])) {
+            abort(404);
+        }
+
+        $path = $type === 'ktp' ? $pegawai->file_ktp : $pegawai->file_kk;
+
+        if (!$path || !Storage::disk('public')->exists($path)) {
+            abort(404);
+        }
+
+        return Storage::disk('public')->download($path);
+    }
+
+    /**
+     * Export Excel
+     */
+    public function export(Request $request)
+    {
+        return Excel::download(
+            new PegawaiExport(auth()->user()),
+            'pegawai.xlsx'
+        );
+    }
+}

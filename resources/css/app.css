@@ -1,11 +1,58 @@
-@import 'tailwindcss';
 
-@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-@source '../../storage/framework/views/*.php';
-@source '../**/*.blade.php';
-@source '../**/*.js';
+/* =====================
+   GLOBAL THEME (BLUE)
+===================== */
 
-@theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+:root {
+    --primary: #2563EB;
+    --primary-dark: #1D4ED8;
+    --primary-soft: #EFF6FF;
+
+    --border: #E5E7EB;
+    --muted: #6B7280;
+    --bg-soft: #F9FAFB;
+}
+
+/* Navbar bottom line (hapus ungu) */
+header {
+    border-bottom: 2px solid var(--primary) !important;
+}
+
+/* Card */
+.card {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.04);
+}
+
+/* Button */
+.btn-primary {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+.btn-primary:hover {
+    background-color: var(--primary-dark);
+}
+
+/* Table */
+.table thead th {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: var(--muted);
+}
+.table tbody tr:hover {
+    background-color: var(--bg-soft);
+}
+
+/* Badge */
+.badge-soft-success {
+    background-color: #DCFCE7;
+    color: #166534;
+    font-weight: 500;
+}
+.badge-soft-secondary {
+    background-color: #E5E7EB;
+    color: #374151;
+    font-weight: 500;
 }
