@@ -1,47 +1,23 @@
 <?php
 
-namespace App\Exports;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-use App\Models\Pegawai;
-use Illuminate\Support\Facades\Auth;
-use Maatwebsite\Excel\Concerns\FromCollection;
-use Maatwebsite\Excel\Concerns\WithHeadings;
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
-
-class PegawaiExport implements FromCollection, WithHeadings, ShouldAutoSize
+return new class extends Migration
 {
-    public function collection()
+    public function up(): void
     {
-        $user = Auth::user();
-
-        $query = Pegawai::query()
-            ->with('satker')
-            ->orderBy('nama');
-
-        // Admin satker hanya export satkernya
-        if ($user->isAdminSatker()) {
-            $query->where('satker_id', $user->satker_id);
-        }
-
-        return $query->get()->map(function ($pegawai) {
-            return [
-                'Nama'       => $pegawai->nama,
-                'NIK'        => $pegawai->nik,
-                'Pendidikan' => $pegawai->pendidikan,
-                'Satker'     => $pegawai->satker?->nama_satker ?? '-',
-                'Status'     => $pegawai->status === 'aktif' ? 'Aktif' : 'Non Aktif',
-            ];
+        Schema::table('pegawais', function (Blueprint $table) {
+            $table->string('file_ktp')->nullable();
+            $table->string('file_kk')->nullable();
         });
     }
 
-    public function headings(): array
+    public function down(): void
     {
-        return [
-            'Nama',
-            'NIK',
-            'Pendidikan',
-            'Satker',
-            'Status',
-        ];
+        Schema::table('pegawais', function (Blueprint $table) {
+            $table->dropColumn(['file_ktp', 'file_kk']);
+        });
     }
-}
+};

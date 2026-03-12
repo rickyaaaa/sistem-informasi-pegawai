@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -85,5 +86,21 @@ class User extends Authenticatable
     public function satker(): BelongsTo
     {
         return $this->belongsTo(Satker::class);
+    }
+
+    /**
+     * Relasi: User (Operator) mengajukan banyak Request Pegawai
+     */
+    public function requestedPegawaiRequests(): HasMany
+    {
+        return $this->hasMany(PegawaiRequest::class, 'requested_by');
+    }
+
+    /**
+     * Relasi: User (Superadmin) menyetujui/menolak banyak Request Pegawai
+     */
+    public function approvedPegawaiRequests(): HasMany
+    {
+        return $this->hasMany(PegawaiRequest::class, 'approved_by');
     }
 }
