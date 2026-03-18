@@ -80,6 +80,10 @@ Route::middleware(['auth', 'role:super_admin,admin_satker'])->group(function () 
 
     Route::resource('pegawai', PegawaiController::class);
 
+    // AJAX: get sub-units for dependent dropdown
+    Route::get('/api/get-sub-satker/{id}', [PegawaiController::class, 'getSubSatker'])
+        ->name('api.sub-satker');
+
     // Export Excel
     Route::get('/pegawai-export', [PegawaiController::class, 'export'])
         ->name('pegawai.export');

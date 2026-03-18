@@ -59,8 +59,8 @@ class PegawaiController extends Controller
         $user = auth()->user();
 
         return view('pegawai.create', [
-            'satkers' => Satker::orderBy('nama_satker')->get(),
-            'user'    => $user,
+            'indukSatkers' => $this->getIndukSatkers($user),
+            'user'         => $user,
         ]);
     }
 
@@ -88,7 +88,18 @@ class PegawaiController extends Controller
 
         // Determine satker_id
         if ($user->isAdminSatker()) {
-            $validated['satker_id'] = $user->satker_id;
+            // Validate that chosen satker_id is a sub-unit of the operator's parent
+            if (empty($validated['satker_id'])) {
+                return back()
+                    ->withErrors(['satker_id' => 'Sub-unit wajib dipilih.'])
+                    ->withInput();
+            }
+            $isValidSub = Satker::where('id', $validated['satker_id'])
+                ->where('parent_id', $user->satker_id)
+                ->exists();
+            if (! $isValidSub) {
+                abort(403, 'Sub-unit tidak valid untuk satker Anda.');
+            }
         } elseif (empty($validated['satker_id'])) {
             return back()
                 ->withErrors(['satker_id' => 'Satker wajib dipilih.'])
@@ -162,14 +173,27 @@ class PegawaiController extends Controller
     {
         $user = auth()->user();
 
-        if ($user->isAdminSatker() && $pegawai->satker_id !== $user->satker_id) {
-            abort(403);
+        // Operator can only edit pegawai within their parent's sub-units
+        if ($user->isAdminSatker()) {
+            $allowedIds = Satker::where('parent_id', $user->satker_id)
+                ->pluck('id')
+                ->toArray();
+            if (! in_array($pegawai->satker_id, $allowedIds)) {
+                abort(403);
+            }
         }
 
+        // For edit: pre-load sub-units of the pegawai's current parent
+        $currentParentId = optional($pegawai->satker)->parent_id;
+        $subSatkers = $currentParentId
+            ? Satker::where('parent_id', $currentParentId)->where('level', 'sub')->orderBy('nama_satker')->get()
+            : collect();
+
         return view('pegawai.edit', [
-            'pegawai' => $pegawai->load('satker'),
-            'satkers' => Satker::orderBy('nama_satker')->get(),
-            'user'    => $user,
+            'pegawai'       => $pegawai->load('satker'),
+            'indukSatkers'  => $this->getIndukSatkers($user),
+            'subSatkers'    => $subSatkers,
+            'user'          => $user,
         ]);
     }
 
@@ -200,7 +224,18 @@ class PegawaiController extends Controller
         ]);
 
         if ($user->isAdminSatker()) {
-            $validated['satker_id'] = $user->satker_id;
+            // Validate that chosen satker_id is a sub-unit of the operator's parent
+            if (empty($validated['satker_id'])) {
+                return back()
+                    ->withErrors(['satker_id' => 'Sub-unit wajib dipilih.'])
+                    ->withInput();
+            }
+            $isValidSub = Satker::where('id', $validated['satker_id'])
+                ->where('parent_id', $user->satker_id)
+                ->exists();
+            if (! $isValidSub) {
+                abort(403, 'Sub-unit tidak valid untuk satker Anda.');
+            }
         } elseif (empty($validated['satker_id'])) {
             return back()
                 ->withErrors(['satker_id' => 'Satker wajib dipilih.'])
@@ -362,4 +397,41 @@ class PegawaiController extends Controller
             'pegawai.xlsx'
         );
     }
+
+    // ── AJAX endpoint for dependent dropdown ────────────────────
+
+    /**
+     * Return sub-units (level=sub) for a given parent (induk) ID.
+     * Used by the dependent dropdown via fetch API.
+     */
+    public function getSubSatker(int $id)
+    {
+        $subSatkers = Satker::where('parent_id', $id)
+            ->where('level', 'sub')
+            ->orderBy('nama_satker')
+            ->get(['id', 'nama_satker']);
+
+        return response()->json($subSatkers);
+    }
+
+    // ── Private helpers for satker dropdown ──────────────────────
+
+    /**
+     * Get induk satkers for the first dropdown.
+     * - Superadmin: all induk
+     * - Operator: only their assigned induk (locked)
+     */
+    private function getIndukSatkers($user)
+    {
+        if ($user->isSuperAdmin()) {
+            return Satker::where('level', 'induk')
+                ->orderBy('nama_satker')
+                ->get();
+        }
+
+        // Operator: only their own induk
+        return Satker::where('id', $user->satker_id)
+            ->get();
+    }
 }
+

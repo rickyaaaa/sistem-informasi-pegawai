@@ -37,7 +37,7 @@ class UserController extends Controller
         }
 
         $users   = $query->paginate(15)->withQueryString();
-        $satkers = Satker::orderBy('nama_satker')->get();
+        $satkers = Satker::where('level', 'induk')->orderBy('nama_satker')->get();
 
         return view('users.index', compact('users', 'satkers'));
     }
@@ -47,7 +47,7 @@ class UserController extends Controller
      */
     public function create()
     {
-        $satkers = Satker::orderBy('nama_satker')->get();
+        $satkers = Satker::where('level', 'induk')->orderBy('nama_satker')->get();
         return view('users.create', compact('satkers'));
     }
 
@@ -91,7 +91,7 @@ class UserController extends Controller
      */
     public function edit(User $user)
     {
-        $satkers = Satker::orderBy('nama_satker')->get();
+        $satkers = Satker::where('level', 'induk')->orderBy('nama_satker')->get();
         return view('users.edit', compact('user', 'satkers'));
     }
 

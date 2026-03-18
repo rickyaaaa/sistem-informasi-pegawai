@@ -78,26 +78,47 @@
         </select>
     </div>
 
-    {{-- Satker --}}
+    {{-- Satker Induk (Tahap 1) --}}
     <div class="col-md-6">
-        <label class="form-label">Satker</label>
+        <label class="form-label">Satker / Satwil Induk</label>
 
         @if($user->isAdminSatker())
-            <input type="hidden" name="satker_id" value="{{ $user->satker_id }}">
+            {{-- Operator: locked to their assigned induk --}}
+            <input type="hidden" id="induk_satker_id" value="{{ $user->satker_id }}">
             <input type="text" class="form-control" value="{{ $user->satker->nama_satker ?? '-' }}" disabled>
         @else
-            <select name="satker_id" class="form-select" required>
-                <option value="">-- Pilih Satker --</option>
-                @foreach($satkers as $satker)
+            {{-- Superadmin: choose induk --}}
+            <select id="induk_satker_id" class="form-select" required>
+                <option value="">-- Pilih Induk --</option>
+                @foreach($indukSatkers as $induk)
                     <option
-                        value="{{ $satker->id }}"
-                        @selected(old('satker_id', $pegawai->satker_id ?? '') == $satker->id)
+                        value="{{ $induk->id }}"
+                        @selected(old('_induk_id', (isset($pegawai) ? optional($pegawai->satker)->parent_id : '')) == $induk->id)
                     >
-                        {{ $satker->nama_satker }}
+                        {{ $induk->nama_satker }} ({{ $induk->tipe_satuan }})
                     </option>
                 @endforeach
             </select>
         @endif
+    </div>
+
+    {{-- Sub-Bagian (Tahap 2) --}}
+    <div class="col-md-6">
+        <label class="form-label">Sub-Bagian</label>
+        <select name="satker_id" id="sub_satker_id" class="form-select" required>
+            <option value="">-- Pilih Induk Terlebih Dahulu --</option>
+            {{-- Pre-fill for edit mode --}}
+            @if(isset($subSatkers) && $subSatkers->count())
+                @foreach($subSatkers as $sub)
+                    <option
+                        value="{{ $sub->id }}"
+                        @selected(old('satker_id', $pegawai->satker_id ?? '') == $sub->id)
+                    >
+                        {{ $sub->nama_satker }}
+                    </option>
+                @endforeach
+            @endif
+        </select>
     </div>
 
     {{-- Upload KTP --}}
@@ -132,3 +153,55 @@
     <button type="submit" class="btn btn-primary">Simpan</button>
     <a href="{{ route('pegawai.index') }}" class="btn btn-outline-secondary">Kembali</a>
 </div>
+
+{{-- Dependent Dropdown Script --}}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const indukSelect = document.getElementById('induk_satker_id');
+    const subSelect   = document.getElementById('sub_satker_id');
+    const preSelected = "{{ old('satker_id', $pegawai->satker_id ?? '') }}";
+
+    function loadSubSatker(parentId, selectedId) {
+        // Reset sub dropdown
+        subSelect.innerHTML = '<option value="">Memuat...</option>';
+        subSelect.disabled = true;
+
+        if (!parentId) {
+            subSelect.innerHTML = '<option value="">-- Pilih Induk Terlebih Dahulu --</option>';
+            return;
+        }
+
+        fetch(`/api/get-sub-satker/${parentId}`)
+            .then(res => res.json())
+            .then(data => {
+                subSelect.innerHTML = '<option value="">-- Pilih Sub-Bagian --</option>';
+                data.forEach(item => {
+                    const opt = document.createElement('option');
+                    opt.value = item.id;
+                    opt.textContent = item.nama_satker;
+                    if (String(item.id) === String(selectedId)) {
+                        opt.selected = true;
+                    }
+                    subSelect.appendChild(opt);
+                });
+                subSelect.disabled = false;
+            })
+            .catch(() => {
+                subSelect.innerHTML = '<option value="">Gagal memuat data</option>';
+            });
+    }
+
+    // Listen for change on induk dropdown (works for both select and hidden input)
+    if (indukSelect.tagName === 'SELECT') {
+        indukSelect.addEventListener('change', function () {
+            loadSubSatker(this.value, '');
+        });
+    }
+
+    // Auto-load sub-units on page load if an induk is already selected
+    const initialInduk = indukSelect.value;
+    if (initialInduk) {
+        loadSubSatker(initialInduk, preSelected);
+    }
+});
+</script>
