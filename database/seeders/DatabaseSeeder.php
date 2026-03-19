@@ -16,7 +16,8 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             SatkerSatwilSeeder::class,  // 1. Hirarki Satker & Satwil
-            UserSeeder::class,          // 2. Superadmin + 43 Operator
+            ProdiSeeder::class,         // 2. Master Program Studi
+            UserSeeder::class,          // 3. Superadmin + 43 Operator
         ]);
     }
 }

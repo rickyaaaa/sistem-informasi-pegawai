@@ -4,10 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\Pegawai;
 use App\Models\PegawaiRequest;
+use App\Models\Prodi;
 use App\Models\Satker;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\Exports\PegawaiExport;
+use App\Exports\PegawaiTemplateExport;
+use App\Imports\PegawaiImport;
 use Maatwebsite\Excel\Facades\Excel;
 
 class PegawaiController extends Controller
@@ -60,6 +63,7 @@ class PegawaiController extends Controller
 
         return view('pegawai.create', [
             'indukSatkers' => $this->getIndukSatkers($user),
+            'prodis'       => Prodi::orderBy('nama')->get(),
             'user'         => $user,
         ]);
     }
@@ -75,16 +79,34 @@ class PegawaiController extends Controller
         $user = $request->user();
 
         $validated = $request->validate([
-            'nama'       => ['required', 'string', 'max:255'],
-            'nik'        => ['required', 'string', 'max:50', 'unique:pegawais,nik'],
+            'nama'          => ['required', 'string', 'max:255'],
+            'nik'           => ['required', 'string', 'size:16', 'regex:/^\d{16}$/', 'unique:pegawais,nik'],
+            'tgl_lahir'     => ['nullable', 'date'],
             'jenis_kelamin' => ['required', 'string', 'in:Laki-laki,Perempuan'],
-            'pendidikan' => ['required', 'string', 'in:SD,SMP,SMA,D1,D2,D3,S1,S1 Profesi,S2,S2 Profesi'],
-            'satker_id'  => ['nullable', 'integer', 'exists:satkers,id'],
-            'status'     => ['required', 'in:aktif,non_aktif'],
-            'foto'       => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
-            'file_ktp'   => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:2048'],
-            'file_kk'    => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:2048'],
+            'pendidikan'    => ['required', 'string', 'in:SD,SMP,SMA/SMK,D3,S1,S1 Profesi,S2,S2 Profesi'],
+            'prodi_id'      => ['nullable', 'integer', 'exists:prodis,id'],
+            'prodi_lainnya' => ['nullable', 'string', 'max:255'],
+            'tgl_kerja'     => ['nullable', 'date'],
+            'satker_id'     => ['nullable', 'integer', 'exists:satkers,id'],
+            'status'        => ['required', 'in:aktif,non_aktif'],
+            'keterangan'    => ['nullable', 'string', 'max:500'],
+            'foto'          => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
+            'file_ktp'      => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:2048'],
+            'file_kk'       => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:2048'],
         ]);
+
+        // Handle "Lainnya" prodi — create new prodi if provided
+        if (!empty($validated['prodi_lainnya'])) {
+            $kategoriProdi = in_array($validated['pendidikan'], ['SD', 'SMP'])
+                ? 'Umum'
+                : (($validated['pendidikan'] === 'SMA/SMK') ? 'SMA/SMK' : 'Perguruan Tinggi');
+
+            $newProdi = Prodi::firstOrCreate(
+                ['nama' => $validated['prodi_lainnya'], 'kategori' => $kategoriProdi]
+            );
+            $validated['prodi_id'] = $newProdi->id;
+        }
+        unset($validated['prodi_lainnya']);
 
         // Determine satker_id
         if ($user->isAdminSatker()) {
@@ -190,9 +212,10 @@ class PegawaiController extends Controller
             : collect();
 
         return view('pegawai.edit', [
-            'pegawai'       => $pegawai->load('satker'),
+            'pegawai'       => $pegawai->load('satker', 'prodi'),
             'indukSatkers'  => $this->getIndukSatkers($user),
             'subSatkers'    => $subSatkers,
+            'prodis'        => Prodi::orderBy('nama')->get(),
             'user'          => $user,
         ]);
     }
@@ -212,16 +235,34 @@ class PegawaiController extends Controller
         }
 
         $validated = $request->validate([
-            'nama'       => ['required', 'string', 'max:255'],
-            'nik'        => ['required', 'string', 'max:50', 'unique:pegawais,nik,' . $pegawai->id],
+            'nama'          => ['required', 'string', 'max:255'],
+            'nik'           => ['required', 'string', 'size:16', 'regex:/^\d{16}$/', 'unique:pegawais,nik,' . $pegawai->id],
+            'tgl_lahir'     => ['nullable', 'date'],
             'jenis_kelamin' => ['required', 'string', 'in:Laki-laki,Perempuan'],
-            'pendidikan' => ['required', 'string', 'in:SD,SMP,SMA,D1,D2,D3,S1,S1 Profesi,S2,S2 Profesi'],
-            'satker_id'  => ['nullable', 'integer', 'exists:satkers,id'],
-            'status'     => ['required', 'in:aktif,non_aktif'],
-            'foto'       => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
-            'file_ktp'   => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:2048'],
-            'file_kk'    => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:2048'],
+            'pendidikan'    => ['required', 'string', 'in:SD,SMP,SMA/SMK,D3,S1,S1 Profesi,S2,S2 Profesi'],
+            'prodi_id'      => ['nullable', 'integer', 'exists:prodis,id'],
+            'prodi_lainnya' => ['nullable', 'string', 'max:255'],
+            'tgl_kerja'     => ['nullable', 'date'],
+            'satker_id'     => ['nullable', 'integer', 'exists:satkers,id'],
+            'status'        => ['required', 'in:aktif,non_aktif'],
+            'keterangan'    => ['nullable', 'string', 'max:500'],
+            'foto'          => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
+            'file_ktp'      => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:2048'],
+            'file_kk'       => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:2048'],
         ]);
+
+        // Handle "Lainnya" prodi — create new prodi if provided
+        if (!empty($validated['prodi_lainnya'])) {
+            $kategoriProdi = in_array($validated['pendidikan'], ['SD', 'SMP'])
+                ? 'Umum'
+                : (($validated['pendidikan'] === 'SMA/SMK') ? 'SMA/SMK' : 'Perguruan Tinggi');
+
+            $newProdi = Prodi::firstOrCreate(
+                ['nama' => $validated['prodi_lainnya'], 'kategori' => $kategoriProdi]
+            );
+            $validated['prodi_id'] = $newProdi->id;
+        }
+        unset($validated['prodi_lainnya']);
 
         if ($user->isAdminSatker()) {
             // Validate that chosen satker_id is a sub-unit of the operator's parent
@@ -394,7 +435,58 @@ class PegawaiController extends Controller
     {
         return Excel::download(
             new PegawaiExport(auth()->user()),
-            'pegawai.xlsx'
+            'data_pegawai_' . date('Y-m-d') . '.xlsx'
+        );
+    }
+
+    /**
+     * Import Pegawai from Excel file.
+     */
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => ['required', 'file', 'mimes:xlsx,xls,csv', 'max:5120'],
+        ], [
+            'file.required' => 'File Excel wajib diunggah.',
+            'file.mimes'    => 'Format file harus .xlsx, .xls, atau .csv.',
+            'file.max'      => 'Ukuran file maksimal 5MB.',
+        ]);
+
+        $import = new PegawaiImport();
+        Excel::import($import, $request->file('file'));
+
+        // Collect row-level failures
+        $failures = $import->failures();
+
+        if ($failures->isNotEmpty()) {
+            $errors = [];
+            foreach ($failures as $failure) {
+                $row    = $failure->row();
+                $column = $failure->attribute();
+                foreach ($failure->errors() as $msg) {
+                    $errors[] = "Baris ke-{$row} (kolom '{$column}'): {$msg}";
+                }
+            }
+
+            return redirect()
+                ->route('pegawai.index')
+                ->with('import_errors', $errors)
+                ->with('warning', 'Import selesai dengan ' . count($errors) . ' error. Baris yang gagal dilewati.');
+        }
+
+        return redirect()
+            ->route('pegawai.index')
+            ->with('success', 'Import data pegawai berhasil!');
+    }
+
+    /**
+     * Download blank Excel template for import.
+     */
+    public function downloadTemplate()
+    {
+        return Excel::download(
+            new PegawaiTemplateExport(),
+            'template_import_pegawai.xlsx'
         );
     }
 
@@ -412,6 +504,22 @@ class PegawaiController extends Controller
             ->get(['id', 'nama_satker']);
 
         return response()->json($subSatkers);
+    }
+
+    /**
+     * Return prodi list filtered by kategori.
+     * Uses query param ?kategori= to avoid slash issue with SMA/SMK.
+     */
+    public function getProdiByKategori(Request $request)
+    {
+        $kategori = $request->query('kategori', '');
+
+        $prodis = Prodi::where('kategori', $kategori)
+            ->orWhere('kategori', 'Umum')
+            ->orderBy('nama')
+            ->get(['id', 'nama', 'kategori']);
+
+        return response()->json($prodis);
     }
 
     // ── Private helpers for satker dropdown ──────────────────────

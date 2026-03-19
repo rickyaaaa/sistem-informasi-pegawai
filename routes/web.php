@@ -78,15 +78,25 @@ Route::middleware(['auth', 'role:super_admin'])->group(function () {
 */
 Route::middleware(['auth', 'role:super_admin,admin_satker'])->group(function () {
 
+    // Import/Export/Template — MUST be before resource route
+    Route::post('/pegawai/import', [PegawaiController::class, 'import'])
+        ->name('pegawai.import');
+
+    Route::get('/pegawai/template', [PegawaiController::class, 'downloadTemplate'])
+        ->name('pegawai.template');
+
+    Route::get('/pegawai-export', [PegawaiController::class, 'export'])
+        ->name('pegawai.export');
+
     Route::resource('pegawai', PegawaiController::class);
 
     // AJAX: get sub-units for dependent dropdown
     Route::get('/api/get-sub-satker/{id}', [PegawaiController::class, 'getSubSatker'])
         ->name('api.sub-satker');
 
-    // Export Excel
-    Route::get('/pegawai-export', [PegawaiController::class, 'export'])
-        ->name('pegawai.export');
+    // AJAX: get prodi by kategori for dynamic dropdown (query param to handle SMA/SMK slash)
+    Route::get('/api/get-prodi', [PegawaiController::class, 'getProdiByKategori'])
+        ->name('api.prodi');
 
     // Preview KTP / KK
     Route::get('/pegawai/{pegawai}/file/{type}',

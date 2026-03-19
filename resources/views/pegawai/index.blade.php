@@ -9,10 +9,56 @@
         <h5 class="fw-bold mb-0">Daftar Pegawai</h5>
         <small class="text-muted">Total {{ $pegawais->total() }} pegawai terdaftar</small>
     </div>
-    <a href="{{ route('pegawai.create') }}" class="btn btn-primary btn-sm">
-        <i class="bi bi-plus-lg me-1"></i> Tambah Pegawai
-    </a>
+    <div class="d-flex gap-2">
+        <a href="{{ route('pegawai.export') }}" class="btn btn-success btn-sm">
+            <i class="bi bi-file-earmark-arrow-down me-1"></i> Export Excel
+        </a>
+        <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#importModal">
+            <i class="bi bi-file-earmark-arrow-up me-1"></i> Import Excel
+        </button>
+        <a href="{{ route('pegawai.create') }}" class="btn btn-primary btn-sm">
+            <i class="bi bi-plus-lg me-1"></i> Tambah Pegawai
+        </a>
+    </div>
 </div>
+
+{{-- Flash Messages --}}
+@if(session('success'))
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle-fill me-1"></i> {{ session('success') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+@endif
+
+@if(session('warning'))
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-1"></i> {{ session('warning') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+@endif
+
+@if(session('import_errors'))
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <strong><i class="bi bi-x-circle-fill me-1"></i> Detail Error Import:</strong>
+        <ul class="mb-0 mt-2" style="max-height:200px;overflow-y:auto;font-size:13px;">
+            @foreach(session('import_errors') as $err)
+                <li>{{ $err }}</li>
+            @endforeach
+        </ul>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+@endif
+
+@if($errors->any())
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <ul class="mb-0">
+            @foreach($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+@endif
 
 {{-- Info banner for admin_satker --}}
 @if(auth()->user()->isAdminSatker())
@@ -118,24 +164,17 @@
                             </td>
 
                             <td class="text-end">
-                                {{-- View detail button --}}
                                 <a href="{{ route('pegawai.show', $pegawai) }}"
-                                   class="btn btn-outline-primary btn-sm"
-                                   title="Lihat Detail">
+                                   class="btn btn-outline-primary btn-sm" title="Lihat Detail">
                                     <i class="bi bi-eye"></i>
                                 </a>
-
-                                {{-- Edit button --}}
                                 <a href="{{ route('pegawai.edit', $pegawai) }}"
                                    class="btn btn-outline-secondary btn-sm"
                                    title="{{ auth()->user()->isAdminSatker() ? 'Ajukan perubahan data' : 'Edit' }}">
                                     <i class="bi bi-pencil-square"></i>
                                 </a>
-
-                                {{-- Delete button --}}
                                 <form action="{{ route('pegawai.destroy', $pegawai) }}"
-                                      method="POST"
-                                      class="d-inline"
+                                      method="POST" class="d-inline"
                                       onsubmit="return confirm('{{ auth()->user()->isAdminSatker()
                                             ? 'Permintaan hapus akan dikirim ke Super Admin untuk persetujuan. Lanjutkan?'
                                             : 'Yakin ingin menghapus pegawai ini?' }}')">
@@ -167,4 +206,52 @@
     {{ $pegawais->links() }}
 </div>
 
+{{-- Import Modal --}}
+<div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="importModalLabel">
+                    <i class="bi bi-file-earmark-arrow-up me-1"></i> Import Data Pegawai
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ route('pegawai.import') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Upload File Excel</label>
+                        <input type="file" name="file" class="form-control"
+                               accept=".xlsx,.xls,.csv" required>
+                        <small class="text-muted">Format: .xlsx, .xls, atau .csv. Maks 5MB.</small>
+                    </div>
+
+                    <div class="alert alert-info border-0 py-2 px-3" style="font-size:13px;">
+                        <i class="bi bi-lightbulb me-1"></i>
+                        <strong>Tips:</strong> Download template terlebih dahulu agar format kolom sesuai.
+                        <br>
+                        <a href="{{ route('pegawai.template') }}" class="fw-semibold">
+                            <i class="bi bi-download me-1"></i> Download Template Excel
+                        </a>
+                    </div>
+
+                    <div style="font-size:12px;" class="text-muted">
+                        <strong>Kolom wajib:</strong> nama, nik, jenis_kelamin, pendidikan, satker, status<br>
+                        <strong>NIK:</strong> Harus 16 digit angka<br>
+                        <strong>Satker:</strong> Isi nama Sub-Bagian yang terdaftar di sistem<br>
+                        <strong>Upsert:</strong> Jika NIK sudah ada, data akan di-<em>update</em>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-warning btn-sm">
+                        <i class="bi bi-upload me-1"></i> Import
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 @endsection
+
