@@ -347,7 +347,7 @@
             <a href="{{ route('satker.index') }}"
                class="nav-link {{ request()->routeIs('satker.*') ? 'active' : '' }}">
                 <i class="bi bi-building-fill"></i>
-                Satker
+                DATA SATKER/SATWIL
             </a>
 
             <a href="{{ route('users.index') }}"

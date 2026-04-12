@@ -50,6 +50,9 @@ Route::middleware('auth')->group(function () {
 */
 Route::middleware(['auth', 'role:super_admin'])->group(function () {
 
+    Route::delete('/satker-bulk', [SatkerController::class, 'bulkDestroy'])
+        ->name('satker.bulk-destroy');
+
     Route::resource('satker', SatkerController::class)
         ->except(['show']);
 
@@ -99,14 +102,16 @@ Route::middleware(['auth', 'role:super_admin,admin_satker'])->group(function () 
         ->name('api.prodi');
 
     // Preview KTP / KK
-    Route::get('/pegawai/{pegawai}/file/{type}',
+    Route::get(
+        '/pegawai/{pegawai}/file/{type}',
         [PegawaiController::class, 'showFile']
     )->name('pegawai.file.show');
 
     // Download KTP / KK
-    Route::get('/pegawai/{pegawai}/file/{type}/download',
+    Route::get(
+        '/pegawai/{pegawai}/file/{type}/download',
         [PegawaiController::class, 'downloadFile']
     )->name('pegawai.file.download');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

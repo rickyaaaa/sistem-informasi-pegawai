@@ -196,6 +196,27 @@
                                 @endif
                             </div>
                         </div>
+                    {{-- Ijazah --}}
+                    <div class="col-sm-6">
+                        <div class="d-flex align-items-center gap-3 p-3 rounded-3" style="background:#fefce8;border:1px solid #fde047;">
+                            <div style="width:42px;height:42px;border-radius:10px;background:#fef9c3;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                <i class="bi bi-mortarboard text-warning" style="font-size:20px;"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="fw-medium" style="font-size:14px;">Ijazah</div>
+                                @if($pegawai->file_ijazah)
+                                    <a href="{{ route('pegawai.file.show', [$pegawai, 'ijazah']) }}" target="_blank" class="text-primary small text-decoration-none">
+                                        <i class="bi bi-eye me-1"></i> Lihat
+                                    </a>
+                                    <span class="mx-1 text-muted">|</span>
+                                    <a href="{{ route('pegawai.file.download', [$pegawai, 'ijazah']) }}" class="text-primary small text-decoration-none">
+                                        <i class="bi bi-download me-1"></i> Unduh
+                                    </a>
+                                @else
+                                    <span class="text-muted small">Belum diupload</span>
+                                @endif
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

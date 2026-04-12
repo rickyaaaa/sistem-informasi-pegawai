@@ -4,16 +4,23 @@ namespace App\Http\Controllers;
 
 use App\Models\Satker;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class SatkerController extends Controller
 {
     public function index()
-{
-    $satkers = Satker::orderBy('nama_satker')
-        ->paginate(10);
+    {
+        $satkers = Satker::whereNull('parent_id')
+            ->with([
+                'children' => function ($query) {
+                    $query->orderBy('nama_satker');
+                }
+            ])
+            ->orderBy('nama_satker')
+            ->paginate(10);
 
-    return view('satker.index', compact('satkers'));
-}
+        return view('satker.index', compact('satkers'));
+    }
 
     public function create()
     {
@@ -23,45 +30,115 @@ class SatkerController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'nama_satker' => ['required', 'string', 'max:255', 'unique:satkers,nama_satker'],
+            'nama_satker' => ['required', 'string', 'max:255'],
+            'tipe_satuan' => ['required', 'in:satker,satwil'],
+            'sub_units' => ['nullable', 'array'],
+            'sub_units.*' => ['string', 'max:255'],
         ]);
 
-        Satker::create($validated);
+        $namaNormalized = strtoupper(trim($validated['nama_satker']));
+
+        // Cek duplikat induk
+        $existing = Satker::whereNull('parent_id')
+            ->where('nama_satker', $namaNormalized)
+            ->first();
+
+        if ($existing) {
+            // Kalau request dari AI import (AJAX), return 409 Conflict
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['message' => 'already_exists'], 409);
+            }
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['nama_satker' => 'Satker/Satwil dengan nama ini sudah ada.']);
+        }
+
+        DB::transaction(function () use ($validated, $namaNormalized) {
+            $parent = Satker::create([
+                'nama_satker' => $namaNormalized,
+                'tipe_satuan' => $validated['tipe_satuan'],
+                'level' => 'induk',
+                'parent_id' => null,
+            ]);
+
+            if (!empty($validated['sub_units'])) {
+                $subs = array_map(fn($s) => [
+                    'nama_satker' => strtoupper(trim($s)),
+                    'tipe_satuan' => $validated['tipe_satuan'],
+                    'level' => 'sub',
+                    'parent_id' => $parent->id,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ], $validated['sub_units']);
+
+                Satker::insert($subs);
+            }
+        });
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json(['message' => 'created'], 201);
+        }
 
         return redirect()
             ->route('satker.index')
-            ->with('success', 'Satker berhasil ditambahkan.');
+            ->with('success', 'Satker/Satwil beserta sub-unit berhasil ditambahkan.');
     }
 
     public function edit(Satker $satker)
     {
-        return view('satker.edit', [
-            'satker' => $satker,
-        ]);
+        $parents = Satker::whereNull('parent_id')
+            ->where('id', '!=', $satker->id)
+            ->orderBy('nama_satker')
+            ->get();
+
+        return view('satker.edit', compact('satker', 'parents'));
     }
 
     public function update(Request $request, Satker $satker)
     {
         $validated = $request->validate([
-            'nama_satker' => ['required', 'string', 'max:255', 'unique:satkers,nama_satker,'.$satker->id],
+            'nama_satker' => ['required', 'string', 'max:255'],
+            'tipe_satuan' => ['required', 'in:satker,satwil'],
+            'parent_id' => ['nullable', 'exists:satkers,id'],
         ]);
+
+        $validated['nama_satker'] = strtoupper($validated['nama_satker']);
+        $validated['level'] = !empty($validated['parent_id']) ? 'sub' : 'induk';
 
         $satker->update($validated);
 
         return redirect()
             ->route('satker.index')
-            ->with('success', 'Satker berhasil diperbarui.');
+            ->with('success', 'Satker/Satwil berhasil diperbarui.');
     }
 
     public function destroy(Satker $satker)
     {
-        // NOTE (Thesis-friendly):
-        // When we later connect pegawai/users to satker with foreign keys,
-        // deletion may be restricted. We'll handle that case with a clear message.
-        $satker->delete();
+        $satker->delete(); // cascade ke children via DB foreign key
 
         return redirect()
             ->route('satker.index')
-            ->with('success', 'Satker berhasil dihapus.');
+            ->with('success', 'Satker/Satwil berhasil dihapus.');
+    }
+
+    /**
+     * Bulk delete: hapus banyak satker/sub sekaligus.
+     * Dikirim dari form checkbox di index.
+     */
+    public function bulkDestroy(Request $request)
+    {
+        $request->validate([
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'exists:satkers,id'],
+        ]);
+
+        // Hapus semua ID yang dipilih (termasuk anak-anaknya via cascade)
+        Satker::whereIn('id', $request->ids)->delete();
+
+        $count = count($request->ids);
+
+        return redirect()
+            ->route('satker.index')
+            ->with('success', "{$count} item berhasil dihapus.");
     }
 }

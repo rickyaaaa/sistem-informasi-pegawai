@@ -75,6 +75,9 @@ class ApprovalController extends Controller
             if (! empty($payload['file_kk'])) {
                 Storage::disk('public')->delete($payload['file_kk']);
             }
+            if (! empty($payload['file_ijazah'])) {
+                Storage::disk('public')->delete($payload['file_ijazah']);
+            }
         }
 
         $approvalRequest->update([
@@ -104,6 +107,9 @@ class ApprovalController extends Controller
         if (! empty($payload['file_kk']) && $pegawai->file_kk && $pegawai->file_kk !== $payload['file_kk']) {
             Storage::disk('public')->delete($pegawai->file_kk);
         }
+        if (! empty($payload['file_ijazah']) && $pegawai->file_ijazah && $pegawai->file_ijazah !== $payload['file_ijazah']) {
+            Storage::disk('public')->delete($pegawai->file_ijazah);
+        }
 
         $pegawai->update($payload);
     }
@@ -118,6 +124,9 @@ class ApprovalController extends Controller
         }
         if ($pegawai->file_kk) {
             Storage::disk('public')->delete($pegawai->file_kk);
+        }
+        if ($pegawai->file_ijazah) {
+            Storage::disk('public')->delete($pegawai->file_ijazah);
         }
 
         $pegawai->delete(); // SoftDelete

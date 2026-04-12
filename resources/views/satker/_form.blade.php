@@ -11,6 +11,20 @@
         >
     </div>
 
+    <div class="col-md-12 mt-3">
+        <label class="form-label">Satker Induk (Opsional, Pilih jika ini Sub-Satker)</label>
+        <select name="parent_id" class="form-select">
+            <option value="">-- Tidak Ada / Satker Utama --</option>
+            @if(isset($parents))
+                @foreach($parents as $parent)
+                    <option value="{{ $parent->id }}" {{ old('parent_id', $satker->parent_id ?? '') == $parent->id ? 'selected' : '' }}>
+                        {{ $parent->nama_satker }}
+                    </option>
+                @endforeach
+            @endif
+        </select>
+    </div>
+
 </div>
 
 <div class="mt-4 d-flex gap-2">

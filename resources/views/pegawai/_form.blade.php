@@ -181,6 +181,19 @@
         @endisset
     </div>
 
+    {{-- Upload Ijazah --}}
+    <div class="col-md-6">
+        <label class="form-label">Upload Ijazah</label>
+        <input type="file" name="file_ijazah" class="form-control" accept=".pdf,.jpg,.jpeg,.png">
+        @isset($pegawai)
+            @if($pegawai->file_ijazah)
+                <small class="text-muted">
+                    <a target="_blank" href="{{ asset('storage/'.$pegawai->file_ijazah) }}">Lihat Ijazah</a>
+                </small>
+            @endif
+        @endisset
+    </div>
+
 </div>
 
 <div class="mt-4 d-flex gap-2">
@@ -204,7 +217,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const preSelectedSatker = "{{ old('satker_id', $pegawai->satker_id ?? '') }}";
     const preSelectedProdi  = "{{ old('prodi_id', $pegawai->prodi_id ?? '') }}";
-    const preSelectedInduk  = "{{ old('_induk_id', (isset($pegawai) ? optional($pegawai->satker)->parent_id : '')) }}";
+    const preSelectedInduk  = "{{ old('_induk_id', (isset($pegawai) ? (optional($pegawai->satker)->level === 'induk' ? $pegawai->satker_id : optional($pegawai->satker)->parent_id) : '')) }}";
 
     // Master induk data passed from server
     const allIndukSatkers = @json($indukSatkers->map(fn($s) => ['id' => $s->id, 'nama_satker' => $s->nama_satker, 'tipe_satuan' => $s->tipe_satuan]));

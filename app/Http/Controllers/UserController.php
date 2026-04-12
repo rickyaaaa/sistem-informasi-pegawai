@@ -149,6 +149,10 @@ class UserController extends Controller
             return back()->with('error', 'Anda tidak dapat menghapus akun sendiri.');
         }
 
+        // Delete related PegawaiRequests first (since SQLite might not have ON DELETE CASCADE)
+        \App\Models\PegawaiRequest::where('requested_by', $user->id)->delete();
+        \App\Models\PegawaiRequest::where('approved_by', $user->id)->update(['approved_by' => null]);
+
         $user->delete();
 
         return redirect()

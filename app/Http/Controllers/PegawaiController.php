@@ -93,6 +93,7 @@ class PegawaiController extends Controller
             'foto'          => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
             'file_ktp'      => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:2048'],
             'file_kk'       => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:2048'],
+            'file_ijazah'   => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:2048'],
         ]);
 
         // Handle "Lainnya" prodi — create new prodi if provided
@@ -116,10 +117,13 @@ class PegawaiController extends Controller
                     ->withErrors(['satker_id' => 'Sub-unit wajib dipilih.'])
                     ->withInput();
             }
+            
             $isValidSub = Satker::where('id', $validated['satker_id'])
                 ->where('parent_id', $user->satker_id)
                 ->exists();
-            if (! $isValidSub) {
+            
+            // Allow if the chosen unit IS the operator's own unit (induk without subs)
+            if (! $isValidSub && $validated['satker_id'] != $user->satker_id) {
                 abort(403, 'Sub-unit tidak valid untuk satker Anda.');
             }
         } elseif (empty($validated['satker_id'])) {
@@ -146,6 +150,12 @@ class PegawaiController extends Controller
                 ->store('pegawai/kk', 'public');
         } else {
             unset($validated['file_kk']);
+        }
+        if ($request->hasFile('file_ijazah')) {
+            $validated['file_ijazah'] = $request->file('file_ijazah')
+                ->store('pegawai/ijazah', 'public');
+        } else {
+            unset($validated['file_ijazah']);
         }
 
         // ── Super admin: direct insert ──────────────────────────
@@ -207,9 +217,18 @@ class PegawaiController extends Controller
 
         // For edit: pre-load sub-units of the pegawai's current parent
         $currentParentId = optional($pegawai->satker)->parent_id;
-        $subSatkers = $currentParentId
-            ? Satker::where('parent_id', $currentParentId)->where('level', 'sub')->orderBy('nama_satker')->get()
-            : collect();
+        
+        if (optional($pegawai->satker)->level === 'induk') {
+            // Pegawai menempel langsung pada induk (induk tidak punya sub)
+            $currentParentId = $pegawai->satker_id;
+            $subSatkers = collect([
+                (object) ['id' => $pegawai->satker_id, 'nama_satker' => '- ' . $pegawai->satker->nama_satker . ' (Tanpa Sub-Unit) -']
+            ]);
+        } else {
+            $subSatkers = $currentParentId
+                ? Satker::where('parent_id', $currentParentId)->where('level', 'sub')->orderBy('nama_satker')->get()
+                : collect();
+        }
 
         return view('pegawai.edit', [
             'pegawai'       => $pegawai->load('satker', 'prodi'),
@@ -249,6 +268,7 @@ class PegawaiController extends Controller
             'foto'          => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
             'file_ktp'      => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:2048'],
             'file_kk'       => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:2048'],
+            'file_ijazah'   => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:2048'],
         ]);
 
         // Handle "Lainnya" prodi — create new prodi if provided
@@ -271,10 +291,12 @@ class PegawaiController extends Controller
                     ->withErrors(['satker_id' => 'Sub-unit wajib dipilih.'])
                     ->withInput();
             }
+            
             $isValidSub = Satker::where('id', $validated['satker_id'])
                 ->where('parent_id', $user->satker_id)
                 ->exists();
-            if (! $isValidSub) {
+            
+            if (! $isValidSub && $validated['satker_id'] != $user->satker_id) {
                 abort(403, 'Sub-unit tidak valid untuk satker Anda.');
             }
         } elseif (empty($validated['satker_id'])) {
@@ -305,6 +327,15 @@ class PegawaiController extends Controller
                 ->store('pegawai/kk', 'public');
         } else {
             unset($validated['file_kk']);
+        }
+        if ($request->hasFile('file_ijazah')) {
+            if ($pegawai->file_ijazah && Storage::disk('public')->exists($pegawai->file_ijazah)) {
+                Storage::disk('public')->delete($pegawai->file_ijazah);
+            }
+            $validated['file_ijazah'] = $request->file('file_ijazah')
+                ->store('pegawai/ijazah', 'public');
+        } else {
+            unset($validated['file_ijazah']);
         }
 
         // Determine redirect target (back to show page if coming from there)
@@ -389,11 +420,16 @@ class PegawaiController extends Controller
             abort(403);
         }
 
-        if (!in_array($type, ['ktp', 'kk'])) {
+        if (!in_array($type, ['ktp', 'kk', 'ijazah'])) {
             abort(404);
         }
 
-        $path = $type === 'ktp' ? $pegawai->file_ktp : $pegawai->file_kk;
+        $path = match ($type) {
+            'ktp' => $pegawai->file_ktp,
+            'kk' => $pegawai->file_kk,
+            'ijazah' => $pegawai->file_ijazah,
+            default => null,
+        };
 
         if (!$path || !Storage::disk('public')->exists($path)) {
             abort(404);
@@ -415,11 +451,16 @@ class PegawaiController extends Controller
             abort(403);
         }
 
-        if (!in_array($type, ['ktp', 'kk'])) {
+        if (!in_array($type, ['ktp', 'kk', 'ijazah'])) {
             abort(404);
         }
 
-        $path = $type === 'ktp' ? $pegawai->file_ktp : $pegawai->file_kk;
+        $path = match ($type) {
+            'ktp' => $pegawai->file_ktp,
+            'kk' => $pegawai->file_kk,
+            'ijazah' => $pegawai->file_ijazah,
+            default => null,
+        };
 
         if (!$path || !Storage::disk('public')->exists($path)) {
             abort(404);
@@ -502,6 +543,15 @@ class PegawaiController extends Controller
             ->where('level', 'sub')
             ->orderBy('nama_satker')
             ->get(['id', 'nama_satker']);
+
+        if ($subSatkers->isEmpty()) {
+            $parent = Satker::find($id);
+            if ($parent) {
+                return response()->json([
+                    ['id' => $parent->id, 'nama_satker' => '- ' . $parent->nama_satker . ' (Tanpa Sub-Unit) -']
+                ]);
+            }
+        }
 
         return response()->json($subSatkers);
     }
