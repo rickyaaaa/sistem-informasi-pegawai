@@ -45,19 +45,19 @@ class NewPegawaiRequestNotification extends Notification
         $nikPegawai  = $this->request->data_payload['nik'] ?? '-';
 
         return (new MailMessage)
-            ->subject('🔔 Pengajuan Approval Baru: ' . $action . ' Pegawai')
-            ->greeting('Halo Admin Polda,')
-            ->line('Ada pengajuan baru yang memerlukan persetujuan Anda.')
+            ->subject('🔔 Notifikasi HRM: Pengajuan Approval ' . $action)
+            ->greeting('Yth. Admin Polda,')
+            ->line('Kami informasikan bahwa terdapat pengajuan perubahan data pegawai baru yang memerlukan tinjauan dan persetujuan Anda segera.')
             ->level('info')
-            ->line('**Detail Pengajuan:**')
-            ->line('• **Operator:** ' . $operator)
-            ->line('• **Satker:** ' . $satker)
-            ->line('• **Jenis Aksi:** ' . $action)
+            ->line('**Rincian Pengajuan:**')
+            ->line('• **Dibuat Oleh:** ' . $operator)
+            ->line('• **Satker Asal:** ' . $satker)
+            ->line('• **Tipe Perubahan:** ' . $action)
             ->line('• **Nama Pegawai:** ' . $namaPegawai)
             ->line('• **NIK:** ' . $nikPegawai)
-            ->action('Buka Approval Center', route('approvals.index'))
-            ->line('Mohon segera tinjau pengajuan ini pada sistem HRM.')
-            ->salutation('Salam, Sistem HRM Pegawai');
+            ->action('Proses Persetujuan Sekarang', route('approvals.index'))
+            ->line('Terima kasih atas kerja sama Anda dalam menjaga integritas data kepegawaian.')
+            ->salutation('Hormat Kami, Tim IT HRM Polda');
     }
 
     /**
