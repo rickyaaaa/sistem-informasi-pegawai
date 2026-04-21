@@ -132,3 +132,15 @@ Route::middleware(['auth', 'role:super_admin,admin_satker'])->group(function () 
 });
 
 require __DIR__ . '/auth.php';
+
+use Illuminate\Support\Facades\Mail;
+Route::get('/test-mail-aja', function () {
+    try {
+        Mail::raw('Halo bro, ini tes email dari Laravel Hosting!', function ($message) {
+            $message->to('rickyadryanachmad19@gmail.com')->subject('Tes SMTP Brevo');
+        });
+        return "Gokil! Email berhasil dikirim. Cek inbox lu!";
+    } catch (\Exception $e) {
+        return "Aduh gagal bro. Errornya: " . $e->getMessage();
+    }
+});

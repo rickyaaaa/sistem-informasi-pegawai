@@ -15,6 +15,8 @@ return [
 
     'name' => env('APP_NAME', 'Laravel'),
 
+    'admin_notification_email' => env('ADMIN_NOTIFICATION_EMAIL'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Environment

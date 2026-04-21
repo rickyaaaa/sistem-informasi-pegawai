@@ -724,7 +724,7 @@ class PegawaiController extends Controller
     private function notifyAdmin(PegawaiRequest $request)
     {
         try {
-            $adminEmail = env('ADMIN_NOTIFICATION_EMAIL');
+            $adminEmail = config('app.admin_notification_email');
             
             if ($adminEmail) {
                 Notification::route('mail', $adminEmail)
@@ -742,7 +742,7 @@ class PegawaiController extends Controller
     private function notifyAdminSummary($operator)
     {
         try {
-            $adminEmail = env('ADMIN_NOTIFICATION_EMAIL');
+            $adminEmail = config('app.admin_notification_email');
             
             if ($adminEmail) {
                 // We'll just send a general "check your dashboard" notification for imports
