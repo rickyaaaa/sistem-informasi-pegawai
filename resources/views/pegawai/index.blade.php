@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Data Pegawai')
+@section('title', 'DATA PEGAWAI')
 
 @section('content')
 
@@ -9,10 +9,56 @@
         <h5 class="fw-bold mb-0">Daftar Pegawai</h5>
         <small class="text-muted">Total {{ $pegawais->total() }} pegawai terdaftar</small>
     </div>
-    <a href="{{ route('pegawai.create') }}" class="btn btn-primary btn-sm">
-        <i class="bi bi-plus-lg me-1"></i> Tambah Pegawai
-    </a>
+    <div class="d-flex gap-2">
+        <a href="{{ route('pegawai.export') }}" class="btn btn-success btn-sm">
+            <i class="bi bi-file-earmark-arrow-down me-1"></i> Export Excel
+        </a>
+        <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#importModal">
+            <i class="bi bi-file-earmark-arrow-up me-1"></i> Import Excel
+        </button>
+        <a href="{{ route('pegawai.create') }}" class="btn btn-primary btn-sm">
+            <i class="bi bi-plus-lg me-1"></i> Tambah Pegawai
+        </a>
+    </div>
 </div>
+
+{{-- Flash Messages --}}
+@if(session('success'))
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle-fill me-1"></i> {{ session('success') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+@endif
+
+@if(session('warning'))
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-1"></i> {{ session('warning') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+@endif
+
+@if(session('import_errors'))
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <strong><i class="bi bi-x-circle-fill me-1"></i> Detail Error Import:</strong>
+        <ul class="mb-0 mt-2" style="max-height:200px;overflow-y:auto;font-size:13px;">
+            @foreach(session('import_errors') as $err)
+                <li>{{ $err }}</li>
+            @endforeach
+        </ul>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+@endif
+
+@if($errors->any())
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <ul class="mb-0">
+            @foreach($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+@endif
 
 {{-- Info banner for admin_satker --}}
 @if(auth()->user()->isAdminSatker())
@@ -23,7 +69,7 @@
             <div class="fw-semibold text-primary mb-1" style="font-size:14px;">Mode Pengajuan Aktif</div>
             <div class="text-secondary" style="font-size:13px;">
                 Setiap tindakan <strong>tambah, ubah, atau hapus</strong> pegawai akan dikirim sebagai permintaan
-                dan memerlukan persetujuan <strong>Super Admin</strong> sebelum diterapkan ke sistem.
+                dan memerlukan persetujuan <strong>ADMIN POLDA</strong> sebelum diterapkan ke sistem.
             </div>
         </div>
     </div>
@@ -39,7 +85,7 @@
         </div>
         <div class="col-md-4">
             <select name="satker_id" class="form-select form-select-sm">
-                <option value="">-- Semua Satker --</option>
+                <option value="">-- SEMUA SATKER/SATWIL --</option>
                 @foreach($satkers as $satker)
                     <option value="{{ $satker->id }}"
                         {{ ($selectedSatkerId ?? '') == $satker->id ? 'selected' : '' }}>
@@ -67,85 +113,71 @@
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
                 <thead class="table-light small text-muted">
-                    <tr>
-                        <th style="width:50px;">#</th>
-                        <th>Pegawai</th>
+                    <tr class="text-uppercase">
+                        <th style="width:40px;" class="text-center">
+                            <input type="checkbox" class="form-check-input" disabled>
+                        </th>
+                        <th style="width:50px;">NO</th>
+                        <th>NAMA</th>
                         <th>NIK</th>
-                        <th>Jenis Kelamin</th>
-                        <th>Pendidikan</th>
-                        <th>Satker</th>
-                        <th>Status</th>
-                        <th class="text-end" style="width:170px;">Aksi</th>
+                        <th>PENDIDIKAN</th>
+                        <th>SATKER/SATWIL</th>
+                        <th>SUB/BAG</th>
+                        <th class="text-end" style="width:120px;">ACTION</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($pegawais as $pegawai)
                         <tr>
+                            {{-- Checkbox --}}
+                            <td class="text-center">
+                                <input type="checkbox" class="form-check-input" disabled>
+                            </td>
+
+                            {{-- NO --}}
                             <td class="text-muted">
                                 {{ ($pegawais->currentPage() - 1) * $pegawais->perPage() + $loop->iteration }}
                             </td>
 
-                            {{-- Pegawai: avatar + nama --}}
-                            <td>
-                                <div class="d-flex align-items-center gap-2">
-                                    @if($pegawai->foto)
-                                        <img src="{{ asset('storage/' . $pegawai->foto) }}"
-                                             alt="{{ $pegawai->nama }}"
-                                             style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid #e5e7eb;flex-shrink:0;">
-                                    @else
-                                        <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#3b82f6,#6366f1);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px;flex-shrink:0;">
-                                            {{ strtoupper(substr($pegawai->nama, 0, 1)) }}
-                                        </div>
-                                    @endif
-                                    <span class="fw-medium">{{ $pegawai->nama }}</span>
-                                </div>
-                            </td>
+                            {{-- NAMA --}}
+                            <td class="fw-bold">{{ strtoupper($pegawai->nama) }}</td>
 
+                            {{-- NIK --}}
                             <td>{{ $pegawai->nik }}</td>
-                            <td>{{ $pegawai->jenis_kelamin ?? '-' }}</td>
-                            <td>{{ $pegawai->pendidikan }}</td>
-                            <td>{{ $pegawai->satker->nama_satker ?? '-' }}</td>
-                            <td>
-                                @if($pegawai->status === 'aktif')
-                                    <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
-                                        Aktif
-                                    </span>
-                                @else
-                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1">
-                                        Non Aktif
-                                    </span>
-                                @endif
-                            </td>
 
-                            <td class="text-end">
-                                {{-- View detail button --}}
+                            {{-- PENDIDIKAN --}}
+                            <td>{{ strtoupper($pegawai->pendidikan) }}</td>
+
+                            {{-- SATKER/SATWIL dan SUB --}}
+                            @php
+                                $isInduk = empty($pegawai->satker->parent_id);
+                                $indukName = $isInduk ? ($pegawai->satker->nama_satker ?? '-') : ($pegawai->satker->parent->nama_satker ?? '-');
+                                $subName = $isInduk ? '-' : ($pegawai->satker->nama_satker ?? '-');
+                            @endphp
+                            <td>{{ strtoupper($indukName) }}</td>
+                            <td class="text-muted" style="font-size: 13px;">{{ strtoupper($subName) }}</td>
+
+                            <td class="text-end" style="white-space:nowrap;">
                                 <a href="{{ route('pegawai.show', $pegawai) }}"
-                                   class="btn btn-outline-primary btn-sm"
-                                   title="Lihat Detail">
+                                   class="text-primary mx-1" title="Lihat Detail">
                                     <i class="bi bi-eye"></i>
                                 </a>
-
-                                {{-- Edit button --}}
                                 <a href="{{ route('pegawai.edit', $pegawai) }}"
-                                   class="btn btn-outline-secondary btn-sm"
+                                   class="text-success mx-1"
                                    title="{{ auth()->user()->isAdminSatker() ? 'Ajukan perubahan data' : 'Edit' }}">
                                     <i class="bi bi-pencil-square"></i>
                                 </a>
-
-                                {{-- Delete button --}}
+                                @if(auth()->user()->isSuperAdmin())
                                 <form action="{{ route('pegawai.destroy', $pegawai) }}"
-                                      method="POST"
-                                      class="d-inline"
-                                      onsubmit="return confirm('{{ auth()->user()->isAdminSatker()
-                                            ? 'Permintaan hapus akan dikirim ke Super Admin untuk persetujuan. Lanjutkan?'
-                                            : 'Yakin ingin menghapus pegawai ini?' }}')">
+                                      method="POST" class="d-inline"
+                                      onsubmit="return confirm('Yakin ingin menghapus pegawai ini?')">
                                     @csrf
                                     @method('DELETE')
-                                    <button class="btn btn-outline-danger btn-sm"
-                                            title="{{ auth()->user()->isAdminSatker() ? 'Ajukan penghapusan' : 'Hapus' }}">
+                                    <button type="submit" class="text-danger mx-1 border-0 bg-transparent" title="Hapus">
                                         <i class="bi bi-trash3"></i>
                                     </button>
                                 </form>
+                                @endif
                             </td>
                         </tr>
                     @empty
@@ -167,4 +199,52 @@
     {{ $pegawais->links() }}
 </div>
 
+{{-- Import Modal --}}
+<div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="importModalLabel">
+                    <i class="bi bi-file-earmark-arrow-up me-1"></i> Import Data Pegawai
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ route('pegawai.import') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Upload File Excel</label>
+                        <input type="file" name="file" class="form-control"
+                               accept=".xlsx,.xls,.csv" required>
+                        <small class="text-muted">Format: .xlsx, .xls, atau .csv. Maks 5MB.</small>
+                    </div>
+
+                    <div class="alert alert-info border-0 py-2 px-3" style="font-size:13px;">
+                        <i class="bi bi-lightbulb me-1"></i>
+                        <strong>Tips:</strong> Download template terlebih dahulu agar format kolom sesuai.
+                        <br>
+                        <a href="{{ route('pegawai.template') }}" class="fw-semibold">
+                            <i class="bi bi-download me-1"></i> Download Template Excel
+                        </a>
+                    </div>
+
+                    <div style="font-size:12px;" class="text-muted">
+                        <strong>Kolom wajib:</strong> nama, nik, jenis_kelamin, pendidikan, satker, status<br>
+                        <strong>NIK:</strong> Harus 16 digit angka<br>
+                        <strong>Satker:</strong> Isi nama Sub-Bagian yang terdaftar di sistem<br>
+                        <strong>Upsert:</strong> Jika NIK sudah ada, data akan di-<em>update</em>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-warning btn-sm">
+                        <i class="bi bi-upload me-1"></i> Import
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 @endsection
+

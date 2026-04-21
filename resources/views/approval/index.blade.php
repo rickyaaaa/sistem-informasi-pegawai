@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Approval Pegawai')
+@section('title', 'APPROVAL PEGAWAI')
 
 @section('content')
 
@@ -122,6 +122,9 @@
                                     <span class="badge bg-danger px-2 py-1">
                                         <i class="bi bi-x-circle me-1"></i>Rejected
                                     </span>
+                                    @if(!empty($req->keterangan))
+                                        <div class="small text-muted mt-1" style="font-size:11px;">{{ $req->keterangan }}</div>
+                                    @endif
                                 @endif
                             </td>
 
@@ -138,14 +141,14 @@
                                             </button>
                                         </form>
 
-                                        <form action="{{ route('approval.reject', $req) }}"
-                                              method="POST"
-                                              onsubmit="return confirm('Tolak permintaan ini?')">
-                                            @csrf
-                                            <button type="submit" class="btn btn-danger btn-sm">
-                                                <i class="bi bi-x-lg"></i> Reject
-                                            </button>
-                                        </form>
+                                        {{-- Reject via modal --}}
+                                        <button type="button" class="btn btn-danger btn-sm"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#rejectModal"
+                                                data-req-id="{{ $req->id }}"
+                                                data-req-url="{{ route('approval.reject', $req) }}">
+                                            <i class="bi bi-x-lg"></i> Reject
+                                        </button>
                                     </div>
                                 @else
                                     <div class="text-end small text-muted lh-sm">
@@ -157,7 +160,7 @@
 
                         </tr>
 
-                        {{-- Payload detail row (collapsed by default) --}}
+                        {{-- Payload detail row --}}
                         @if($req->action_type !== 'delete' && $req->data_payload)
                         <tr class="table-light small">
                             <td></td>
@@ -167,15 +170,26 @@
                                 &middot; NIK: {{ $req->data_payload['nik'] ?? '-' }}
                                 &middot; Pendidikan: {{ $req->data_payload['pendidikan'] ?? '-' }}
                                 &middot; Status: {{ $req->data_payload['status'] ?? '-' }}
+                                @if(!empty($req->data_payload['keterangan']))
+                                    &middot; Ket: {{ $req->data_payload['keterangan'] }}
+                                @endif
                                 @if(!empty($req->data_payload['file_ktp']))
+                                    @php
+                                        $ktpPegawai = $req->pegawai;
+                                    @endphp
                                     &middot; KTP: <a target="_blank"
-                                        href="{{ asset('storage/' . $req->data_payload['file_ktp']) }}"
+                                        href="{{ $ktpPegawai ? route('pegawai.file.show', [$ktpPegawai, 'ktp']) : asset('storage/' . $req->data_payload['file_ktp']) }}"
                                         class="text-primary">Lihat</a>
                                 @endif
                                 @if(!empty($req->data_payload['file_kk']))
                                     &middot; KK: <a target="_blank"
-                                        href="{{ asset('storage/' . $req->data_payload['file_kk']) }}"
+                                        href="{{ $ktpPegawai ?? ($req->pegawai) ? route('pegawai.file.show', [$req->pegawai ?? $ktpPegawai, 'kk']) : asset('storage/' . $req->data_payload['file_kk']) }}"
                                         class="text-primary">Lihat</a>
+                                @endif
+                                @if(!empty($req->data_payload['file_ijazah']))
+                                    &middot; Ijazah: <a target="_blank"
+                                        href="{{ $req->pegawai ? route('pegawai.file.show', [$req->pegawai, 'ijazah']) : asset('storage/' . $req->data_payload['file_ijazah']) }}"
+                                        class="text-primary">Lihat Ijazah</a>
                                 @endif
                             </td>
                         </tr>
@@ -199,5 +213,49 @@
 <div class="mt-3">
     {{ $requests->links() }}
 </div>
+
+{{-- ── Reject Modal ── --}}
+<div class="modal fade" id="rejectModal" tabindex="-1" aria-labelledby="rejectModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="rejectModalLabel">
+                    <i class="bi bi-x-circle me-2"></i> Tolak Permintaan
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="rejectForm" method="POST" action="">
+                @csrf
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Alasan Penolakan <span class="text-danger">*</span></label>
+                        <textarea name="keterangan" class="form-control" rows="3"
+                                  placeholder="Masukkan alasan penolakan..." required></textarea>
+                        <small class="text-muted">Alasan ini akan ditampilkan pada daftar permintaan.</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-x-lg me-1"></i> Tolak Permintaan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@push('scripts')
+<script>
+const rejectModal = document.getElementById('rejectModal');
+rejectModal.addEventListener('show.bs.modal', function (event) {
+    const btn = event.relatedTarget;
+    const url = btn.getAttribute('data-req-url');
+    document.getElementById('rejectForm').action = url;
+    // Clear textarea
+    rejectModal.querySelector('textarea[name="keterangan"]').value = '';
+});
+</script>
+@endpush
 
 @endsection

@@ -18,6 +18,7 @@ class PegawaiRequest extends Model
         'status',
         'approved_by',
         'approved_at',
+        'keterangan',
     ];
 
     protected function casts(): array

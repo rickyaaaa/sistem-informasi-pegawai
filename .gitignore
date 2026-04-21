@@ -22,3 +22,17 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Database SQLite — jangan di-deploy ke production
+/database/*.sqlite
+/database/*.sqlite-shm
+/database/*.sqlite-wal
+
+# NPM debug
+npm-debug.log*
+package-lock.json.bak
+
+# Debug / temporary scripts — JANGAN ikut di-deploy
+_*.php
+test.php
+debug.php

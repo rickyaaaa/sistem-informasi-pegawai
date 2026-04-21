@@ -3,15 +3,79 @@
 namespace App\Exports;
 
 use App\Models\Pegawai;
-use Maatwebsite\Excel\Concerns\FromCollection;
+use App\Models\Satker;
+use App\Models\User;
+use Maatwebsite\Excel\Concerns\FromQuery;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithMapping;
+use Maatwebsite\Excel\Concerns\WithColumnFormatting;
+use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 
-class PegawaiExport implements FromCollection
+class PegawaiExport implements FromQuery, WithHeadings, WithMapping, WithColumnFormatting, ShouldAutoSize
 {
-    /**
-    * @return \Illuminate\Support\Collection
-    */
-    public function collection()
+    protected User $user;
+
+    public function __construct(User $user)
     {
-        return Pegawai::all();
+        $this->user = $user;
+    }
+
+    public function query()
+    {
+        $query = Pegawai::query()->with(['satker.parent', 'prodi']);
+
+        if ($this->user->isAdminSatker()) {
+            $subIds = Satker::where('parent_id', $this->user->satker_id)
+                ->pluck('id');
+            $query->whereIn('satker_id', $subIds);
+        }
+
+        return $query->orderBy('nama');
+    }
+
+    public function headings(): array
+    {
+        return [
+            'NIK',
+            'NAMA',
+            'TGL LAHIR',
+            'JK',
+            'PENDIDIKAN',
+            'PRODI',
+            'TGL KERJA',
+            'SATKER',
+            'UNIT KERJA',
+            'STATUS',
+            'STATUS K-II',
+            'NOMOR K-II',
+            'KET',
+        ];
+    }
+
+    public function map($pegawai): array
+    {
+        return [
+            $pegawai->nik,
+            $pegawai->nama,
+            $pegawai->tgl_lahir ? $pegawai->tgl_lahir->format('d/m/Y') : '-',
+            $pegawai->jenis_kelamin ?? '-',
+            $pegawai->pendidikan ?? '-',
+            $pegawai->prodi->nama ?? '-',
+            $pegawai->tgl_kerja ? $pegawai->tgl_kerja->format('d/m/Y') : '-',
+            optional($pegawai->satker)->parent->nama_satker ?? '-',
+            $pegawai->satker->nama_satker ?? '-',
+            $pegawai->status === 'aktif' ? 'Aktif' : 'Non Aktif',
+            $pegawai->status_k2,
+            $pegawai->nomor_k2 ?? '-',
+            $pegawai->keterangan ?? '',
+        ];
+    }
+
+    public function columnFormats(): array
+    {
+        return [
+            'A' => NumberFormat::FORMAT_TEXT, // NIK as text
+        ];
     }
 }

@@ -59,8 +59,8 @@
                             <select name="role" id="roleSelect"
                                     class="form-select @error('role') is-invalid @enderror" required>
                                 <option value="">-- Pilih Role --</option>
-                                <option value="super_admin"  {{ old('role') === 'super_admin'  ? 'selected' : '' }}>Super Admin</option>
-                                <option value="admin_satker" {{ old('role') === 'admin_satker' ? 'selected' : '' }}>Operator</option>
+                                <option value="super_admin"  {{ old('role') === 'super_admin'  ? 'selected' : '' }}>ADMIN POLDA</option>
+                                <option value="admin_satker" {{ old('role') === 'admin_satker' ? 'selected' : '' }}>OPERATOR</option>
                             </select>
                             @error('role') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
@@ -79,7 +79,7 @@
                         <div class="col-md-12" id="satkerField"
                              style="{{ old('role') === 'admin_satker' ? '' : 'display:none;' }}">
                             <label class="form-label fw-semibold">
-                                Satker <span class="text-danger">*</span>
+                                Satker dan Satwil <span class="text-danger">*</span>
                             </label>
                             <select name="satker_id"
                                     class="form-select @error('satker_id') is-invalid @enderror">

@@ -138,15 +138,15 @@ flowchart TD
 
     GUEST -- Sudah --> CHECKROLE
 
-    CHECKROLE -- super_admin --> SA_DASH["🏠 Dashboard Super Admin\nFull Access"]
+    CHECKROLE -- super_admin --> SA_DASH["🏠 Dashboard Admin Polda\nFull Access"]
     CHECKROLE -- admin_satker --> OP_DASH["🏠 Dashboard Operator\nScoped to Satker"]
 ```
 
-### 2B. Alur Utama Super Admin
+### 2B. Alur Utama Admin Polda
 
 ```mermaid
 flowchart TD
-    SA["👑 Super Admin\nDashboard"] --> SA_MENU{"Pilih Menu"}
+    SA["👑 Admin Polda\nDashboard"] --> SA_MENU{"Pilih Menu"}
 
     SA_MENU --> M_SATKER["📋 Kelola Satker"]
     SA_MENU --> M_USER["👥 Kelola User"]
@@ -225,11 +225,11 @@ flowchart TD
     OP_EDIT --> REQ_U["Buat PegawaiRequest\naction_type: update\nstatus: pending"]
     OP_DELETE --> REQ_D["Buat PegawaiRequest\naction_type: delete\nstatus: pending"]
 
-    REQ_C --> WAIT["⏳ Menunggu Persetujuan\nSuper Admin"]
+    REQ_C --> WAIT["⏳ Menunggu Persetujuan\nAdmin Polda"]
     REQ_U --> WAIT
     REQ_D --> WAIT
 
-    WAIT --> SA_REVIEW{"Super Admin Review"}
+    WAIT --> SA_REVIEW{"Admin Polda Review"}
     SA_REVIEW -- Approved --> APPLIED["✅ Perubahan Diterapkan\nke DB pegawais"]
     SA_REVIEW -- Rejected --> DITOLAK["❌ Permintaan Ditolak\nFile di-cleanup"]
 
@@ -245,10 +245,10 @@ flowchart TD
 flowchart LR
     START(["Operator Submit"]) --> PENDING["📋 Status: PENDING\ndata_payload = snapshot data\naction_type = create/update/delete\napproved_by = NULL"]
 
-    PENDING --> REVIEW{"Super Admin\nReview"}
+    PENDING --> REVIEW{"Admin Polda\nReview"}
 
-    REVIEW -- Approve --> APPROVED["✅ Status: APPROVED\napproved_by = Super Admin ID\napproved_at = timestamp"]
-    REVIEW -- Reject --> REJECTED["❌ Status: REJECTED\napproved_by = Super Admin ID\napproved_at = timestamp"]
+    REVIEW -- Approve --> APPROVED["✅ Status: APPROVED\napproved_by = Admin Polda ID\napproved_at = timestamp"]
+    REVIEW -- Reject --> REJECTED["❌ Status: REJECTED\napproved_by = Admin Polda ID\napproved_at = timestamp"]
 
     APPROVED --> APPLY_ACTION{"Terapkan Action"}
     APPLY_ACTION -- create --> DO_CREATE["INSERT pegawai baru\nke tabel pegawais"]
@@ -271,7 +271,7 @@ flowchart LR
 
 ### Role-Based Access Control (RBAC)
 
-| Fitur | Super Admin | Operator (Admin Satker) |
+| Fitur | Admin Polda | Operator (Admin Satker) |
 |-------|:-----------:|:----------------------:|
 | Dashboard | ✅ Semua data | ✅ Data satker sendiri |
 | Kelola Satker | ✅ CRUD langsung | ❌ |
@@ -288,7 +288,7 @@ Berdasarkan JSON ekspor:
 | Tabel | Jumlah Record | Keterangan |
 |-------|:---:|-------------|
 | `satkers` | 3 | Bagian Umum, Bagian Keuangan, Bagian Kepegawaian |
-| `users` | 2 | 1 Super Admin, 1 Operator (Satker Umum) |
+| `users` | 2 | 1 Admin Polda, 1 Operator (Satker Umum) |
 | `pegawais` | 20 | 8 di Satker 1, 6 di Satker 2, 6 di Satker 3 |
 | `pegawai_requests` | 0 | Belum ada request yang diajukan |
 | `sessions` | 0 | Tidak ada session aktif |

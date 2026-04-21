@@ -95,6 +95,7 @@
             color: rgba(255,255,255,.65);
             transition: background .2s, color .2s;
             text-decoration: none;
+            text-transform: uppercase;
         }
 
         #sidebar .nav-link i {
@@ -189,6 +190,11 @@
             font-weight: 700;
             margin: 0;
             color: #111827;
+            text-transform: uppercase;
+        }
+
+        h1, h2, h3, h4, h5, h6, .modal-title {
+            text-transform: uppercase;
         }
 
         .topbar .topbar-right {
@@ -338,22 +344,28 @@
         </a>
 
         <a href="{{ route('pegawai.index') }}"
-           class="nav-link {{ request()->routeIs('pegawai.*') ? 'active' : '' }}">
+           class="nav-link {{ request()->routeIs('pegawai.*') && !request()->routeIs('pegawai.arsip') ? 'active' : '' }}">
             <i class="bi bi-people-fill"></i>
-            Pegawai
+            PEGAWAI NON ASN
         </a>
 
         @if(auth()->user()->isSuperAdmin())
+            <a href="{{ route('pegawai.arsip') }}"
+               class="nav-link {{ request()->routeIs('pegawai.arsip') ? 'active' : '' }}">
+                <i class="bi bi-archive-fill"></i>
+                ARSIP PEGAWAI
+            </a>
+
             <a href="{{ route('satker.index') }}"
                class="nav-link {{ request()->routeIs('satker.*') ? 'active' : '' }}">
                 <i class="bi bi-building-fill"></i>
-                Satker
+                SATKER/SATWIL
             </a>
 
             <a href="{{ route('users.index') }}"
                class="nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}">
                 <i class="bi bi-people-fill"></i>
-                Users
+                OPERATOR
             </a>
 
             <a href="{{ route('approval.index') }}"
@@ -368,6 +380,13 @@
                         {{ $pendingCount }}
                     </span>
                 @endif
+            </a>
+
+
+            <a href="{{ route('prodi.index') }}"
+               class="nav-link {{ request()->routeIs('prodi.*') ? 'active' : '' }}">
+                <i class="bi bi-journal-bookmark-fill"></i>
+                Program Studi
             </a>
         @endif
     </div>

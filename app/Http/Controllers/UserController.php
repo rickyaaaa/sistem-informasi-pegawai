@@ -37,7 +37,7 @@ class UserController extends Controller
         }
 
         $users   = $query->paginate(15)->withQueryString();
-        $satkers = Satker::orderBy('nama_satker')->get();
+        $satkers = Satker::where('level', 'induk')->orderBy('nama_satker')->get();
 
         return view('users.index', compact('users', 'satkers'));
     }
@@ -47,7 +47,7 @@ class UserController extends Controller
      */
     public function create()
     {
-        $satkers = Satker::orderBy('nama_satker')->get();
+        $satkers = Satker::where('level', 'induk')->orderBy('nama_satker')->get();
         return view('users.create', compact('satkers'));
     }
 
@@ -72,7 +72,7 @@ class UserController extends Controller
                 ->withInput();
         }
 
-        // Super admin doesn't need satker
+        // Admin Polda doesn't need satker
         if ($validated['role'] === 'super_admin') {
             $validated['satker_id'] = null;
         }
@@ -91,7 +91,7 @@ class UserController extends Controller
      */
     public function edit(User $user)
     {
-        $satkers = Satker::orderBy('nama_satker')->get();
+        $satkers = Satker::where('level', 'induk')->orderBy('nama_satker')->get();
         return view('users.edit', compact('user', 'satkers'));
     }
 
@@ -135,19 +135,23 @@ class UserController extends Controller
     }
 
     /**
-     * Delete a user. Super Admin cannot be deleted.
+     * Delete a user. Admin Polda cannot be deleted.
      */
     public function destroy(User $user)
     {
-        // Prevent deleting super admin
+        // Prevent deleting admin polda
         if ($user->isSuperAdmin()) {
-            return back()->with('error', 'Super Admin tidak dapat dihapus.');
+            return back()->with('error', 'Admin Polda tidak dapat dihapus.');
         }
 
         // Prevent deleting own account
         if ($user->id === auth()->id()) {
             return back()->with('error', 'Anda tidak dapat menghapus akun sendiri.');
         }
+
+        // Delete related PegawaiRequests first (since SQLite might not have ON DELETE CASCADE)
+        \App\Models\PegawaiRequest::where('requested_by', $user->id)->delete();
+        \App\Models\PegawaiRequest::where('approved_by', $user->id)->update(['approved_by' => null]);
 
         $user->delete();
 
@@ -161,9 +165,14 @@ class UserController extends Controller
      */
     public function toggleStatus(User $user)
     {
-        // Prevent deactivating own account or super admin
+        // Prevent deactivating own account
         if ($user->id === auth()->id()) {
             return back()->with('error', 'Anda tidak dapat menonaktifkan akun sendiri.');
+        }
+
+        // Prevent deactivating other admin polda
+        if ($user->isSuperAdmin()) {
+            abort(403, 'Anda tidak dapat menonaktifkan Admin Polda lain.');
         }
 
         $user->update([
@@ -173,5 +182,36 @@ class UserController extends Controller
         $label = $user->status === 'active' ? 'diaktifkan' : 'dinonaktifkan';
 
         return back()->with('success', "User berhasil {$label}.");
+    }
+
+    /**
+     * Delete multiple users.
+     */
+    public function bulkDestroy(Request $request)
+    {
+        $ids = $request->input('ids');
+        if (empty($ids)) {
+            return back()->with('error', 'Tidak ada user yang dipilih.');
+        }
+
+        $users = User::whereIn('id', $ids)->get();
+        $count = 0;
+
+        foreach ($users as $user) {
+            /** @var \App\Models\User $user */
+            // Prevent deleting super_admin or own account
+            if ($user->isSuperAdmin() || $user->id === auth()->id()) {
+                continue;
+            }
+
+            // Delete related requests first
+            \App\Models\PegawaiRequest::where('requested_by', $user->id)->delete();
+            \App\Models\PegawaiRequest::where('approved_by', $user->id)->update(['approved_by' => null]);
+
+            $user->delete();
+            $count++;
+        }
+
+        return redirect()->route('users.index')->with('success', "Berhasil menghapus {$count} user.");
     }
 }

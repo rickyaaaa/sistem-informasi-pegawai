@@ -6,8 +6,8 @@
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-        <h5 class="fw-bold mb-0">Daftar User</h5>
-        <small class="text-muted">Total {{ $users->total() }} user terdaftar</small>
+        <h5 class="fw-bold mb-0">Daftar Operator</h5>
+        <small class="text-muted">Total {{ $users->total() }} operator terdaftar</small>
     </div>
     <a href="{{ route('users.create') }}" class="btn btn-primary btn-sm">
         <i class="bi bi-person-plus-fill me-1"></i> Tambah User
@@ -25,8 +25,8 @@
         <div class="col-md-3">
             <select name="role" class="form-select form-select-sm">
                 <option value="">-- Semua Role --</option>
-                <option value="super_admin"  {{ request('role') === 'super_admin'  ? 'selected' : '' }}>Super Admin</option>
-                <option value="admin_satker" {{ request('role') === 'admin_satker' ? 'selected' : '' }}>Operator</option>
+                <option value="super_admin"  {{ request('role') === 'super_admin'  ? 'selected' : '' }}>ADMIN POLDA</option>
+                <option value="admin_satker" {{ request('role') === 'admin_satker' ? 'selected' : '' }}>OPERATOR</option>
             </select>
         </div>
         <div class="col-md-2">
@@ -49,13 +49,25 @@
     </div>
 </form>
 
-{{-- ── Table ── --}}
+{{-- ── Tabel Data & Form Bulk Delete ── --}}
+<form id="bulkDeleteForm" action="{{ route('users.bulk-destroy') }}" method="POST">
+    @csrf
+    @method('DELETE')
+
+    <div class="mb-3">
+        <button type="submit" id="btnBulkDelete" class="btn btn-sm btn-danger d-none" onclick="return confirm('Apakah Anda yakin ingin menghapus user yang dipilih?')">
+            <i class="bi bi-trash3 me-1"></i> Hapus Terpilih (<span id="selectedCount">0</span>)
+        </button>
+    </div>
 <div class="card shadow-sm border-0">
     <div class="card-body p-0">
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
                 <thead class="table-light small text-muted">
                     <tr>
+                        <th style="width:40px;" class="text-center">
+                            <input type="checkbox" id="checkAll" class="form-check-input">
+                        </th>
                         <th style="width:50px;">#</th>
                         <th>Nama</th>
                         <th>Username</th>
@@ -67,7 +79,15 @@
                 </thead>
                 <tbody>
                     @forelse($users as $user)
+                        @php /** @var \App\Models\User $user */ @endphp
                         <tr>
+                            <td class="text-center">
+                                <input type="checkbox"
+                                       name="ids[]"
+                                       value="{{ $user->id }}"
+                                       class="form-check-input checkItem"
+                                       {{ $user->isSuperAdmin() || $user->id === auth()->id() ? 'disabled' : '' }}>
+                            </td>
                             <td class="text-muted">
                                 {{ ($users->currentPage() - 1) * $users->perPage() + $loop->iteration }}
                             </td>
@@ -91,9 +111,9 @@
 
                             <td>
                                 @if($user->isSuperAdmin())
-                                    <span class="badge bg-dark px-2">Super Admin</span>
+                                    <span class="badge bg-dark px-2">ADMIN POLDA</span>
                                 @else
-                                    <span class="badge bg-info-subtle text-info border border-info-subtle px-2">Operator</span>
+                                    <span class="badge bg-info-subtle text-info border border-info-subtle px-2">OPERATOR</span>
                                 @endif
                             </td>
 
@@ -136,7 +156,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="text-center text-muted py-5">
+                            <td colspan="8" class="text-center text-muted py-5">
                                 <i class="bi bi-people fs-2 d-block mb-2 opacity-50"></i>
                                 Tidak ada user ditemukan
                             </td>
@@ -147,9 +167,55 @@
         </div>
     </div>
 </div>
+</form>
 
 <div class="mt-3">
     {{ $users->links() }}
 </div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const checkAll = document.getElementById('checkAll');
+    const checkItems = document.querySelectorAll('.checkItem:not([disabled])');
+    const btnBulkDelete = document.getElementById('btnBulkDelete');
+    const selectedCount = document.getElementById('selectedCount');
+
+    function toggleBulkDeleteButton() {
+        const checked = document.querySelectorAll('.checkItem:checked');
+        if (checked.length > 0) {
+            btnBulkDelete.classList.remove('d-none');
+            selectedCount.textContent = checked.length;
+        } else {
+            btnBulkDelete.classList.add('d-none');
+        }
+    }
+
+    if (checkAll) {
+        checkAll.addEventListener('change', function() {
+            checkItems.forEach(item => {
+                item.checked = this.checked;
+            });
+            toggleBulkDeleteButton();
+        });
+    }
+
+    checkItems.forEach(item => {
+        item.addEventListener('change', function() {
+            // Update checkAll state
+            const allChecked = Array.from(checkItems).every(i => i.checked);
+            const someChecked = Array.from(checkItems).some(i => i.checked);
+
+            if (checkAll) {
+                checkAll.checked = allChecked;
+                checkAll.indeterminate = someChecked && !allChecked;
+            }
+
+            toggleBulkDeleteButton();
+        });
+    });
+});
+</script>
+@endpush
 
 @endsection
