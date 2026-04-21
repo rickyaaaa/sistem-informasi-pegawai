@@ -8,9 +8,9 @@ use App\Models\Prodi;
 use App\Models\Satker;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use App\Exports\PegawaiExport;
-use App\Exports\PegawaiTemplateExport;
 use App\Imports\PegawaiImport;
+use App\Notifications\NewPegawaiRequestNotification;
+use Illuminate\Support\Facades\Notification;
 use Maatwebsite\Excel\Facades\Excel;
 
 class PegawaiController extends Controller
@@ -188,7 +188,7 @@ class PegawaiController extends Controller
         }
 
         // ── Admin satker: submit for approval ───────────────────
-        PegawaiRequest::create([
+        $pegawaiRequest = PegawaiRequest::create([
             'pegawai_id' => null,
             'satker_id' => $validated['satker_id'],
             'requested_by' => $user->id,
@@ -196,6 +196,9 @@ class PegawaiController extends Controller
             'data_payload' => $validated,
             'status' => 'pending',
         ]);
+
+        // Notify Admin
+        $this->notifyAdmin($pegawaiRequest);
 
         return redirect()
             ->route('pegawai.index')
@@ -370,7 +373,7 @@ class PegawaiController extends Controller
         }
 
         // ── Admin satker: submit for approval ───────────────────
-        PegawaiRequest::create([
+        $pegawaiRequest = PegawaiRequest::create([
             'pegawai_id' => $pegawai->id,
             'satker_id' => $validated['satker_id'],
             'requested_by' => $user->id,
@@ -378,6 +381,9 @@ class PegawaiController extends Controller
             'data_payload' => $validated,
             'status' => 'pending',
         ]);
+
+        // Notify Admin
+        $this->notifyAdmin($pegawaiRequest);
 
         $route = $redirectBack
             ? route('pegawai.show', $pegawai)
@@ -409,7 +415,7 @@ class PegawaiController extends Controller
         }
 
         // ── Admin satker: submit for approval ───────────────────
-        PegawaiRequest::create([
+        $pegawaiRequest = PegawaiRequest::create([
             'pegawai_id' => $pegawai->id,
             'satker_id' => $pegawai->satker_id,
             'requested_by' => $user->id,
@@ -417,6 +423,9 @@ class PegawaiController extends Controller
             'data_payload' => ['nama' => $pegawai->nama, 'nik' => $pegawai->nik],
             'status' => 'pending',
         ]);
+
+        // Notify Admin
+        $this->notifyAdmin($pegawaiRequest);
 
         return redirect()
             ->route('pegawai.index')
@@ -505,6 +514,11 @@ class PegawaiController extends Controller
 
         $import = new PegawaiImport();
         Excel::import($import, $request->file('file'));
+
+        // Notify Admin of new requests from import
+        if ($request->user()->isAdminSatker()) {
+            $this->notifyAdminSummary($request->user());
+        }
 
         // Collect row-level failures
         $failures = $import->failures();
@@ -702,6 +716,42 @@ class PegawaiController extends Controller
         $pegawai->forceDelete();
 
         return redirect()->route('pegawai.arsip')->with('success', 'Pegawai berhasil dihapus secara permanen.');
+    }
+
+    /**
+     * Helper to notify Super Admin via Email
+     */
+    private function notifyAdmin(PegawaiRequest $request)
+    {
+        try {
+            $adminEmail = env('ADMIN_NOTIFICATION_EMAIL');
+            
+            if ($adminEmail) {
+                Notification::route('mail', $adminEmail)
+                    ->notify(new NewPegawaiRequestNotification($request));
+            }
+        } catch (\Exception $e) {
+            // Silently fail if mail is not configured
+            \Log::error('Gagal mengirim notifikasi email: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Helper to notify Super Admin about a bulk import
+     */
+    private function notifyAdminSummary($operator)
+    {
+        try {
+            $adminEmail = env('ADMIN_NOTIFICATION_EMAIL');
+            
+            if ($adminEmail) {
+                // We'll just send a general "check your dashboard" notification for imports
+                Notification::route('mail', $adminEmail)
+                    ->notify(new \App\Notifications\BulkImportNotification($operator));
+            }
+        } catch (\Exception $e) {
+            \Log::error('Gagal mengirim notifikasi email summary: ' . $e->getMessage());
+        }
     }
 }
 
