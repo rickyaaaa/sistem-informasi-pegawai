@@ -55,7 +55,7 @@ class NewPegawaiRequestNotification extends Notification
             ->line('• **Tipe Perubahan:** ' . $action)
             ->line('• **Nama Pegawai:** ' . $namaPegawai)
             ->line('• **NIK:** ' . $nikPegawai)
-            ->action('Proses Persetujuan Sekarang', route('approvals.index'))
+            ->action('Proses Persetujuan Sekarang', route('approval.index'))
             ->line('Terima kasih atas kerja sama Anda dalam menjaga integritas data kepegawaian.')
             ->salutation('Hormat Kami, Tim IT HRM Polda');
     }

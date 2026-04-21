@@ -40,7 +40,7 @@ class BulkImportNotification extends Notification
             ->greeting('Yth. Admin Polda,')
             ->line('Kami informasikan bahwa Operator **' . $this->operator->name . '** baru saja melakukan import data pegawai dalam jumlah banyak melalui file Excel.')
             ->line('Seluruh data tersebut kini telah mengantri di sistem untuk menunggu persetujuan Anda.')
-            ->action('Periksa Semua Pengajuan', route('approvals.index'))
+            ->action('Periksa Semua Pengajuan', route('approval.index'))
             ->line('Mohon luangkan waktu untuk meninjau kecocokan data tersebut.')
             ->salutation('Hormat Kami, Tim IT HRM Polda');
     }
