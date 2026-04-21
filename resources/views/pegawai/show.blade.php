@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Detail Pegawai')
+@section('title', 'DETAIL PEGAWAI')
 
 @section('content')
 
@@ -71,8 +71,8 @@
                     <i class="bi bi-pencil-square me-1"></i> Edit Pegawai
                 </a>
                 <form action="{{ route('pegawai.destroy', $pegawai) }}" method="POST"
-                      onsubmit="return confirm('{{ auth()->user()->isAdminSatker()
-                            ? 'Permintaan hapus akan dikirim ke Super Admin untuk persetujuan. Lanjutkan?'
+                        onsubmit="return confirm('{{ auth()->user()->isAdminSatker()
+                            ? 'Permintaan hapus akan dikirim ke ADMIN POLDA untuk persetujuan. Lanjutkan?'
                             : 'Yakin ingin menghapus pegawai ini?' }}')">
                     @csrf
                     @method('DELETE')
@@ -139,6 +139,17 @@
                             @endif
                         </div>
                     </div>
+                    <div class="col-sm-6">
+                        <div class="text-muted small mb-1">Status K-II</div>
+                        <div class="fw-medium">
+                            @if($pegawai->status_k2 === 'K-II')
+                                <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-1">K-II</span>
+                                <div class="small text-muted mt-1">Registrasi: {{ $pegawai->nomor_k2 ?: '-' }}</div>
+                            @else
+                                <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2 py-1">Non K-II</span>
+                            @endif
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -196,9 +207,10 @@
                                 @endif
                             </div>
                         </div>
+                    </div>
                     {{-- Ijazah --}}
                     <div class="col-sm-6">
-                        <div class="d-flex align-items-center gap-3 p-3 rounded-3" style="background:#fefce8;border:1px solid #fde047;">
+                        <div class="d-flex align-items-center gap-3 p-3 rounded-3" style="background:#f8fafc;border:1px solid #e5e7eb;">
                             <div style="width:42px;height:42px;border-radius:10px;background:#fef9c3;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                                 <i class="bi bi-mortarboard text-warning" style="font-size:20px;"></i>
                             </div>

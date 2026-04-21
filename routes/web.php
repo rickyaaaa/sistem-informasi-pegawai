@@ -8,6 +8,8 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ApprovalController;
 use App\Http\Controllers\UserController;
 
+use App\Http\Controllers\ProgramStudiController;
+
 /*
 |--------------------------------------------------------------------------
 | Public
@@ -45,7 +47,7 @@ Route::middleware('auth')->group(function () {
 
 /*
 |--------------------------------------------------------------------------
-| Super Admin Only
+| Admin Polda Only
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'role:super_admin'])->group(function () {
@@ -56,7 +58,15 @@ Route::middleware(['auth', 'role:super_admin'])->group(function () {
     Route::resource('satker', SatkerController::class)
         ->except(['show']);
 
+    // ── Arsip Pegawai ──────────────────────────────────────────
+    Route::get('/pegawai/arsip', [PegawaiController::class, 'arsip'])->name('pegawai.arsip');
+    Route::post('/pegawai/{id}/restore', [PegawaiController::class, 'restore'])->name('pegawai.restore');
+    Route::delete('/pegawai/{id}/force-delete', [PegawaiController::class, 'forceDelete'])->name('pegawai.force_delete');
+
     // ── User Management ────────────────────────────────────────
+    Route::delete('/users-bulk', [UserController::class, 'bulkDestroy'])
+        ->name('users.bulk-destroy');
+
     Route::resource('users', UserController::class)
         ->except(['show']);
 
@@ -67,16 +77,23 @@ Route::middleware(['auth', 'role:super_admin'])->group(function () {
     Route::get('/approvals', [ApprovalController::class, 'index'])
         ->name('approval.index');
 
-    Route::post('/approvals/{approvalRequest}/approve', [ApprovalController::class, 'approve'])
-        ->name('approval.approve');
+    Route::middleware('throttle:30,1')->group(function () {
+        Route::post('/approvals/{approvalRequest}/approve', [ApprovalController::class, 'approve'])
+            ->name('approval.approve');
 
-    Route::post('/approvals/{approvalRequest}/reject', [ApprovalController::class, 'reject'])
-        ->name('approval.reject');
+        Route::post('/approvals/{approvalRequest}/reject', [ApprovalController::class, 'reject'])
+            ->name('approval.reject');
+    });
+
+
+    // ── Program Studi ─────────────────────────────────
+    Route::resource('prodi', ProgramStudiController::class)
+        ->except(['show']);
 });
 
 /*
 |--------------------------------------------------------------------------
-| Pegawai (Super Admin & Admin Satker)
+| Pegawai (Admin Polda & Admin Satker)
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'role:super_admin,admin_satker'])->group(function () {

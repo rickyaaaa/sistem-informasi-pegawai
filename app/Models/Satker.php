@@ -15,6 +15,25 @@ class Satker extends Model
         'level',
     ];
 
+    protected static function booted()
+    {
+        static::deleting(function ($satker) {
+            // Hapus request yang terkait
+            $satker->pegawaiRequests()->delete();
+            
+            // Hapus user / operator satker
+            $satker->users()->delete();
+
+            // Hapus pegawai secara permanen (karena satkers di-hard delete)
+            $satker->pegawais()->forceDelete();
+
+            // Cascade ke sub-unit (memicu event deleting pada anaknya juga)
+            foreach ($satker->children as $child) {
+                $child->delete();
+            }
+        });
+    }
+
     // ── Hierarchy Relations ─────────────────────────────────────
 
     /**

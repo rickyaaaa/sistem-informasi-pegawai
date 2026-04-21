@@ -14,8 +14,8 @@
                 <i class="bi bi-hourglass-split text-warning mt-1" style="font-size:18px;flex-shrink:0;"></i>
                 <div>
                     <div class="fw-semibold mb-1" style="font-size:14px;color:#92400e;">Tambah pegawai memerlukan persetujuan</div>
-                    <div style="font-size:13px;color:#78350f;">
-                        Data baru akan dikirim sebagai permintaan dan ditambahkan ke sistem setelah disetujui Super Admin.
+                    <div class="text-secondary" style="font-size:13px;">
+                        Data baru akan dikirim sebagai permintaan dan ditambahkan ke sistem setelah disetujui ADMIN POLDA.
                     </div>
                 </div>
             </div>

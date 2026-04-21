@@ -47,6 +47,8 @@ class PegawaiExport implements FromQuery, WithHeadings, WithMapping, WithColumnF
             'SATKER',
             'UNIT KERJA',
             'STATUS',
+            'STATUS K-II',
+            'NOMOR K-II',
             'KET',
         ];
     }
@@ -64,6 +66,8 @@ class PegawaiExport implements FromQuery, WithHeadings, WithMapping, WithColumnF
             optional($pegawai->satker)->parent->nama_satker ?? '-',
             $pegawai->satker->nama_satker ?? '-',
             $pegawai->status === 'aktif' ? 'Aktif' : 'Non Aktif',
+            $pegawai->status_k2,
+            $pegawai->nomor_k2 ?? '-',
             $pegawai->keterangan ?? '',
         ];
     }

@@ -48,24 +48,26 @@
     {{-- Jenis Kelamin --}}
     <div class="col-md-6">
         <label class="form-label">Jenis Kelamin <span class="text-danger">*</span></label>
-        <select name="jenis_kelamin" class="form-select" required>
+        <select name="jenis_kelamin" class="form-select @error('jenis_kelamin') is-invalid @enderror">
             <option value="">-- Pilih Jenis Kelamin --</option>
-            <option value="Laki-laki" @selected(old('jenis_kelamin', $pegawai->jenis_kelamin ?? '') === 'Laki-laki')>Laki-laki</option>
-            <option value="Perempuan" @selected(old('jenis_kelamin', $pegawai->jenis_kelamin ?? '') === 'Perempuan')>Perempuan</option>
+            <option value="Pria" @selected(old('jenis_kelamin', $pegawai->jenis_kelamin ?? '') === 'Pria')>Pria</option>
+            <option value="Wanita" @selected(old('jenis_kelamin', $pegawai->jenis_kelamin ?? '') === 'Wanita')>Wanita</option>
         </select>
+        @error('jenis_kelamin') <div class="invalid-feedback">{{ $message }}</div> @enderror
     </div>
 
     {{-- Pendidikan --}}
     <div class="col-md-6">
         <label class="form-label">Tingkat Pendidikan <span class="text-danger">*</span></label>
-        <select name="pendidikan" id="pendidikan" class="form-select" required>
+        <select name="pendidikan" id="pendidikan" class="form-select @error('pendidikan') is-invalid @enderror">
             <option value="">-- Pilih Pendidikan --</option>
-            @foreach(['SD', 'SMP', 'SMA/SMK', 'D3', 'S1', 'S1 Profesi', 'S2', 'S2 Profesi'] as $level)
+            @foreach(['SD', 'SMP', 'SMA/SMK', 'D3', 'S1', 'S1 Profesi', 'S2', 'S2 Profesi', 'S3'] as $level)
                 <option value="{{ $level }}" @selected(old('pendidikan', $pegawai->pendidikan ?? '') === $level)>
                     {{ $level }}
                 </option>
             @endforeach
         </select>
+        @error('pendidikan') <div class="invalid-feedback">{{ $message }}</div> @enderror
     </div>
 
     {{-- Prodi (Dynamic) --}}
@@ -95,10 +97,28 @@
     {{-- Status --}}
     <div class="col-md-6">
         <label class="form-label">Status <span class="text-danger">*</span></label>
-        <select name="status" class="form-select" required>
+        <select name="status" class="form-select @error('status') is-invalid @enderror">
             <option value="aktif" @selected(old('status', $pegawai->status ?? '') === 'aktif')>Aktif</option>
             <option value="non_aktif" @selected(old('status', $pegawai->status ?? '') === 'non_aktif')>Non Aktif</option>
         </select>
+        @error('status') <div class="invalid-feedback">{{ $message }}</div> @enderror
+    </div>
+
+    {{-- K-II Status --}}
+    <div class="col-md-6">
+        <label class="form-label">K-II / Non K-II <span class="text-danger">*</span></label>
+        <select name="status_k2" id="status_k2" class="form-select @error('status_k2') is-invalid @enderror">
+            <option value="Non K-II" @selected(old('status_k2', $pegawai->status_k2 ?? '') === 'Non K-II')>Non K-II</option>
+            <option value="K-II" @selected(old('status_k2', $pegawai->status_k2 ?? '') === 'K-II')>K-II</option>
+        </select>
+        @error('status_k2') <div class="invalid-feedback">{{ $message }}</div> @enderror
+    </div>
+
+    {{-- Nomor Registrasi K-II --}}
+    <div class="col-md-6" id="nomor_k2_wrapper" style="display:none;">
+        <label class="form-label">Nomor Registrasi K-II</label>
+        <input type="text" name="nomor_k2" id="nomor_k2" class="form-control"
+               value="{{ old('nomor_k2', $pegawai->nomor_k2 ?? '') }}" placeholder="Masukkan Nomor Registrasi K-II">
     </div>
 
     {{-- ═══════════════ TRIPLE DROPDOWN SATKER ═══════════════ --}}
@@ -111,7 +131,7 @@
             <input type="text" class="form-control" value="{{ ucfirst($opSatker->tipe_satuan ?? '-') }}" disabled>
             <input type="hidden" id="kategori_satker" value="{{ $opSatker->tipe_satuan ?? '' }}">
         @else
-            <select id="kategori_satker" class="form-select" required>
+            <select id="kategori_satker" class="form-select @error('satker_id') is-invalid @enderror">
                 <option value="">-- Pilih Kategori --</option>
                 <option value="satker" @selected(old('_kategori', (isset($pegawai) ? optional($pegawai->satker)->tipe_satuan : '')) === 'satker')>Satker</option>
                 <option value="satwil" @selected(old('_kategori', (isset($pegawai) ? optional($pegawai->satker)->tipe_satuan : '')) === 'satwil')>Satwil</option>
@@ -126,7 +146,7 @@
             <input type="text" class="form-control" value="{{ $user->satker->nama_satker ?? '-' }}" disabled>
             <input type="hidden" id="induk_satker_id" value="{{ $user->satker_id }}">
         @else
-            <select id="induk_satker_id" class="form-select" required>
+            <select id="induk_satker_id" class="form-select @error('satker_id') is-invalid @enderror">
                 <option value="">-- Pilih Kategori --</option>
             </select>
         @endif
@@ -135,7 +155,7 @@
     {{-- Tahap 3: Unit Kerja (Sub-Bagian via AJAX) --}}
     <div class="col-md-4">
         <label class="form-label">Unit Kerja <span class="text-danger">*</span></label>
-        <select name="satker_id" id="sub_satker_id" class="form-select" required>
+        <select name="satker_id" id="sub_satker_id" class="form-select @error('satker_id') is-invalid @enderror">
             <option value="">-- Pilih Satker --</option>
             @if(isset($subSatkers) && $subSatkers->count())
                 @foreach($subSatkers as $sub)
@@ -146,6 +166,7 @@
                 @endforeach
             @endif
         </select>
+        @error('satker_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
     </div>
 
     {{-- Keterangan --}}
@@ -214,6 +235,9 @@ document.addEventListener('DOMContentLoaded', function () {
     const prodiWrapper     = document.getElementById('prodi_wrapper');
     const prodiLainnyaWrap = document.getElementById('prodi_lainnya_wrapper');
     const prodiLainnyaInp  = document.getElementById('prodi_lainnya_input');
+    const statusK2Sel      = document.getElementById('status_k2');
+    const nomorK2Wrap      = document.getElementById('nomor_k2_wrapper');
+    const nomorK2Inp       = document.getElementById('nomor_k2');
 
     const preSelectedSatker = "{{ old('satker_id', $pegawai->satker_id ?? '') }}";
     const preSelectedProdi  = "{{ old('prodi_id', $pegawai->prodi_id ?? '') }}";
@@ -295,6 +319,7 @@ document.addEventListener('DOMContentLoaded', function () {
         'S1 Profesi':  'Perguruan Tinggi',
         'S2':          'Perguruan Tinggi',
         'S2 Profesi':  'Perguruan Tinggi',
+        'S3':          'Perguruan Tinggi',
     };
 
     // ID of the "Lainnya" option (detected dynamically from response)
@@ -377,6 +402,24 @@ document.addEventListener('DOMContentLoaded', function () {
     if (initialPendidikan) {
         const kat = pendidikanKategoriMap[initialPendidikan] ?? null;
         loadProdi(kat, preSelectedProdi);
+    }
+
+    // 3c. K-II Init
+    function toggleNomorK2() {
+        if (statusK2Sel.value === 'K-II') {
+            nomorK2Wrap.style.display = '';
+            // Only require if visibly showing, handled via validation but good practice to add required star dynamically if needed
+            // nomorK2Inp.required = true; 
+        } else {
+            nomorK2Wrap.style.display = 'none';
+            nomorK2Inp.value = '';
+            // nomorK2Inp.required = false;
+        }
+    }
+
+    if (statusK2Sel) {
+        statusK2Sel.addEventListener('change', toggleNomorK2);
+        toggleNomorK2(); // Set initial state
     }
 });
 </script>

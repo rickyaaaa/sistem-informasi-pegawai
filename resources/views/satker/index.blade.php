@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Data Satker/Satwil')
+@section('title', 'DATA SATKER/SATWIL')
 
 @section('content')
 
@@ -11,15 +11,39 @@
             <small class="text-muted">Total {{ $satkers->total() }} Satker/Satwil terdaftar</small>
         </div>
         <div class="d-flex gap-2">
-            {{-- Tombol AI Import --}}
-            <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#modalAiImport">
-                <i class="bi bi-stars me-1"></i> Import via AI
-            </button>
             <a href="{{ route('satker.create') }}" class="btn btn-primary btn-sm">
                 <i class="bi bi-plus-lg me-1"></i> Tambah Satker/Satwil
             </a>
         </div>
     </div>
+
+    {{-- ── Filter bar ── --}}
+    <form method="GET" action="{{ route('satker.index') }}" class="mb-3">
+        <div class="row g-2 align-items-end">
+            <div class="col-md-5">
+                <input type="text" name="q" value="{{ request('q') }}"
+                       class="form-control form-control-sm"
+                       placeholder="Cari nama satker/satwil...">
+            </div>
+            <div class="col-md-3">
+                <select name="tipe" class="form-select form-select-sm">
+                    <option value="">-- Semua --</option>
+                    <option value="satker" {{ request('tipe') === 'satker' ? 'selected' : '' }}>Satker</option>
+                    <option value="satwil" {{ request('tipe') === 'satwil' ? 'selected' : '' }}>Satwil</option>
+                </select>
+            </div>
+            <div class="col-md-2 d-flex gap-1">
+                <button type="submit" class="btn btn-sm btn-primary flex-grow-1">
+                    <i class="bi bi-search"></i>
+                </button>
+                @if(request()->hasAny(['q','tipe']))
+                    <a href="{{ route('satker.index') }}" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-x-lg"></i>
+                    </a>
+                @endif
+            </div>
+        </div>
+    </form>
 
     {{-- ── Bulk Delete Toolbar (muncul saat ada yang dicentang) ────── --}}
     <div id="bulk-toolbar" class="alert alert-danger d-flex align-items-center justify-content-between py-2 px-3 mb-3" style="display:none!important;">

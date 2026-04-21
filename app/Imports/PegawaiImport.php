@@ -3,6 +3,7 @@
 namespace App\Imports;
 
 use App\Models\Pegawai;
+use App\Models\PegawaiRequest;
 use App\Models\Prodi;
 use App\Models\Satker;
 use Carbon\Carbon;
@@ -21,17 +22,24 @@ class PegawaiImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnF
 
     private ?int $operatorParentId;
     private array $allowedSatkerIds;
+    private bool $isAdminSatker;
+    private ?int $requestedBy;
 
     public function __construct()
     {
         $user = Auth::user();
 
         if ($user && $user->isAdminSatker()) {
+            $this->isAdminSatker    = true;
+            $this->requestedBy      = $user->id;
             $this->operatorParentId = $user->satker_id;
             $this->allowedSatkerIds = Satker::where('parent_id', $user->satker_id)
+                ->orWhere('id', $user->satker_id)
                 ->pluck('id')
                 ->toArray();
         } else {
+            $this->isAdminSatker    = false;
+            $this->requestedBy      = null;
             $this->operatorParentId = null;
             $this->allowedSatkerIds = [];
         }
@@ -79,16 +87,32 @@ class PegawaiImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnF
         $data = [
             'nama'          => trim($row['nama']),
             'tgl_lahir'     => $tglLahir,
-            'jenis_kelamin' => trim($row['jk'] ?? ''),
+            'jenis_kelamin' => $this->normalizeGender($row['jk'] ?? ''),
             'pendidikan'    => trim($row['pendidikan'] ?? ''),
             'prodi_id'      => $prodiId,
             'tgl_kerja'     => $tglKerja,
             'satker_id'     => $unitKerja->id,
             'status'        => strtolower(trim($row['status'] ?? 'aktif')),
+            'status_k2'     => trim($row['status_k2'] ?? 'Non K-II'),
+            'nomor_k2'      => trim($row['nomor_k2'] ?? ''),
             'keterangan'    => trim($row['ket'] ?? ''),
         ];
 
-        // Upsert by NIK
+        // ── admin_satker: buat PegawaiRequest (tidak langsung insert) ──
+        if ($this->isAdminSatker) {
+            PegawaiRequest::create([
+                'pegawai_id'   => null,
+                'satker_id'    => $unitKerja->id,
+                'requested_by' => $this->requestedBy,
+                'action_type'  => 'create',
+                'data_payload' => array_merge($data, ['nik' => $nik]),
+                'status'       => 'pending',
+            ]);
+
+            return null; // Jangan insert langsung ke pegawais
+        }
+
+        // ── super_admin: upsert langsung ──
         $pegawai = Pegawai::where('nik', $nik)->first();
 
         if ($pegawai) {
@@ -112,10 +136,11 @@ class PegawaiImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnF
         return [
             'nik'        => ['required', 'string'],
             'nama'       => ['required', 'string', 'max:255'],
-            'jk'         => ['required', Rule::in(['Laki-laki', 'Perempuan', 'L', 'P'])],
-            'pendidikan' => ['required', Rule::in(['SD', 'SMP', 'SMA/SMK', 'D3', 'S1', 'S1 Profesi', 'S2', 'S2 Profesi'])],
+            'jk'         => ['required', Rule::in(['Pria', 'Wanita', 'Laki-laki', 'Perempuan', 'L', 'P'])],
+            'pendidikan' => ['required', Rule::in(['SD', 'SMP', 'SMA/SMK', 'D3', 'S1', 'S1 Profesi', 'S2', 'S2 Profesi', 'S3'])],
             'unit_kerja' => ['required', Rule::in($validSatkerNames)],
             'status'     => ['required'],
+            'status_k2'  => ['nullable', Rule::in(['K-II', 'Non K-II'])],
         ];
     }
 
@@ -125,7 +150,7 @@ class PegawaiImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnF
             'nik.required'        => 'Kolom NIK wajib diisi.',
             'nama.required'       => 'Kolom NAMA wajib diisi.',
             'jk.required'         => 'Kolom JK wajib diisi.',
-            'jk.in'               => 'JK harus "Laki-laki", "Perempuan", "L", atau "P".',
+            'jk.in'               => 'JK harus "Pria", "Wanita", "L", atau "P".',
             'pendidikan.required' => 'Kolom PENDIDIKAN wajib diisi.',
             'pendidikan.in'       => 'PENDIDIKAN tidak valid. Pilihan: SD, SMP, SMA/SMK, D3, S1, S1 Profesi, S2, S2 Profesi.',
             'unit_kerja.required' => 'Kolom UNIT KERJA wajib diisi.',
@@ -172,5 +197,15 @@ class PegawaiImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnF
         } catch (\Exception $e) {}
 
         return null;
+    }
+    /**
+     * Map various gender inputs to "Pria" or "Wanita".
+     */
+    private function normalizeGender($value): string
+    {
+        $v = trim((string) $value);
+        if (in_array($v, ['Laki-laki', 'L', 'Pria'])) return 'Pria';
+        if (in_array($v, ['Perempuan', 'P', 'Wanita'])) return 'Wanita';
+        return $v;
     }
 }

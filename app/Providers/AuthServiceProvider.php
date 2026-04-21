@@ -3,7 +3,7 @@
 namespace App\Providers;
 
 use App\Models\Pegawai;
-use App\Policies\PegawaiPolicy;
+// use App\Policies\PegawaiPolicy; // Kebijakan otorisasi ditangani manual di Controller
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
 class AuthServiceProvider extends ServiceProvider
@@ -14,7 +14,7 @@ class AuthServiceProvider extends ServiceProvider
      * @var array<class-string, class-string>
      */
     protected $policies = [
-        Pegawai::class => PegawaiPolicy::class,
+        // Pegawai::class => PegawaiPolicy::class, // Ditiadakan, cek otorisasi manual di Controller via helper authorizePegawaiAccess()
     ];
 
     public function boot(): void

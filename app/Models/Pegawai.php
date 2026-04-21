@@ -23,6 +23,8 @@ class Pegawai extends Model
         'tgl_kerja',
         'satker_id',
         'status',
+        'status_k2',
+        'nomor_k2',
         'keterangan',
         'file_ktp',
         'file_kk',

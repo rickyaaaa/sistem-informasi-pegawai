@@ -61,8 +61,7 @@
                             <select name="role" id="roleSelect"
                                     class="form-select @error('role') is-invalid @enderror"
                                     required {{ $user->isSuperAdmin() && $user->id === auth()->id() ? 'disabled' : '' }}>
-                                <option value="super_admin"  {{ old('role', $user->role) === 'super_admin'  ? 'selected' : '' }}>Super Admin</option>
-                                <option value="admin_satker" {{ old('role', $user->role) === 'admin_satker' ? 'selected' : '' }}>Operator</option>
+                                <option value="admin_satker" {{ old('role', $user->role) === 'admin_satker' ? 'selected' : '' }}>OPERATOR</option>
                             </select>
                             {{-- hidden field when disabled to keep value submitted --}}
                             @if($user->isSuperAdmin() && $user->id === auth()->id())
@@ -91,7 +90,7 @@
                         <div class="col-md-12" id="satkerField"
                              style="{{ old('role', $user->role) === 'admin_satker' ? '' : 'display:none;' }}">
                             <label class="form-label fw-semibold">
-                                Satker <span class="text-danger">*</span>
+                                Satker dan Satwil <span class="text-danger">*</span>
                             </label>
                             <select name="satker_id"
                                     class="form-select @error('satker_id') is-invalid @enderror">

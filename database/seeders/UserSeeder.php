@@ -15,11 +15,16 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        // ── 1. Akun Super Admin ─────────────────────────────────
+        if (app()->isProduction()) {
+            $this->command->error('Seeder ini tidak boleh dijalankan di environment production.');
+            return;
+        }
+
+        // ── 1. Akun Admin Polda ─────────────────────────────────
         User::query()->firstOrCreate(
             ['username' => 'superadmin'],
             [
-                'name'      => 'Super Admin',
+                'name'      => 'Admin Polda',
                 'password'  => Hash::make('superpassword'),
                 'role'      => 'super_admin',
                 'satker_id' => null,
@@ -27,7 +32,7 @@ class UserSeeder extends Seeder
             ]
         );
 
-        $this->command->info('✔ Akun superadmin berhasil dibuat.');
+        $this->command->info('✔ Akun Admin Polda berhasil dibuat.');
 
         // ── 2. Akun Operator untuk setiap Induk ─────────────────
         $indukSatkers = Satker::where('level', 'induk')->get();

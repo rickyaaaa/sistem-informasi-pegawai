@@ -8,16 +8,28 @@ use Illuminate\Support\Facades\DB;
 
 class SatkerController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $satkers = Satker::whereNull('parent_id')
+        $query = Satker::whereNull('parent_id')
             ->with([
                 'children' => function ($query) {
                     $query->orderBy('nama_satker');
                 }
             ])
-            ->orderBy('nama_satker')
-            ->paginate(10);
+            ->orderBy('nama_satker');
+
+        // Filter by name search
+        if ($request->filled('q')) {
+            $q = trim($request->input('q'));
+            $query->where('nama_satker', 'like', "%{$q}%");
+        }
+
+        // Filter by type (satker / satwil)
+        if ($request->filled('tipe')) {
+            $query->where('tipe_satuan', $request->input('tipe'));
+        }
+
+        $satkers = $query->paginate(10)->withQueryString();
 
         return view('satker.index', compact('satkers'));
     }
@@ -132,8 +144,10 @@ class SatkerController extends Controller
             'ids.*' => ['integer', 'exists:satkers,id'],
         ]);
 
-        // Hapus semua ID yang dipilih (termasuk anak-anaknya via cascade)
-        Satker::whereIn('id', $request->ids)->delete();
+        // Hapus semua ID yang dipilih satu per satu agar men-trigger event 'deleting'
+        Satker::whereIn('id', $request->ids)->get()->each(function (Satker $sat) {
+            $sat->delete();
+        });
 
         $count = count($request->ids);
 

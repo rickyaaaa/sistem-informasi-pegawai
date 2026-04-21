@@ -15,7 +15,7 @@
                 <div>
                     <div class="fw-semibold mb-1" style="font-size:14px;color:#92400e;">Perubahan memerlukan persetujuan</div>
                     <div style="font-size:13px;color:#78350f;">
-                        Data yang Anda ubah akan dikirim sebagai permintaan dan diterapkan setelah disetujui Super Admin.
+                        Data yang Anda ubah akan dikirim sebagai permintaan dan diterapkan setelah disetujui ADMIN POLDA.
                     </div>
                 </div>
             </div>

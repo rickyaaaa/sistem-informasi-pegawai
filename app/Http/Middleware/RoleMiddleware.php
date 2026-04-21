@@ -30,7 +30,7 @@ class RoleMiddleware
 
         // Block inactive users — log them out cleanly
         if (isset($user->status) && $user->status === 'inactive') {
-            auth()->logout();
+            \Illuminate\Support\Facades\Auth::logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();
 

@@ -18,8 +18,8 @@ class User extends Authenticatable
     public const ROLE_ADMIN_SATKER = 'admin_satker';
 
     public const ROLE_DISPLAY_NAMES = [
-        'super_admin'  => 'Super Admin',
-        'admin_satker' => 'Operator',
+        'super_admin'  => 'ADMIN POLDA',
+        'admin_satker' => 'OPERATOR',
     ];
 
     /**
