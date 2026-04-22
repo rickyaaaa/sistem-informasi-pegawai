@@ -13,6 +13,11 @@ class SystemWorkflowTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected $indukSatker;
+    protected $subSatker;
+    protected $superAdmin;
+    protected $operator;
+
     protected function setUp(): void
     {
         parent::setUp();

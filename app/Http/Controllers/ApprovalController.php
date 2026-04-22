@@ -52,7 +52,7 @@ class ApprovalController extends Controller
                 };
 
                 $approvalRequest->update([
-                    'status'      => 'approved',
+                    'status' => 'approved',
                     'approved_by' => auth()->id(),
                     'approved_at' => now(),
                 ]);
@@ -64,8 +64,8 @@ class ApprovalController extends Controller
         // ── Email di luar transaksi (non-kritis, tidak boleh rollback approval) ──
         $actionLabel = $approvalRequest->actionLabel();
         $namaLengkap = $payload['nama'] ?? ($approvalRequest->pegawai->nama ?? '-');
-        $satkerName  = optional($approvalRequest->satker)->nama_satker ?? '-';
-        $approvedBy  = auth()->user()->name;
+        $satkerName = optional($approvalRequest->satker)->nama_satker ?? '-';
+        $approvedBy = auth()->user()->name;
 
         try {
             Mail::raw(
@@ -78,7 +78,7 @@ class ApprovalController extends Controller
                 function ($message) {
                     $email = env('APPROVAL_NOTIFICATION_EMAIL', 'subbagpnslampung@gmail.com');
                     $message->to($email)
-                            ->subject('[Approval] Permintaan Data Pegawai Disetujui');
+                        ->subject('[Approval] Permintaan Data Pegawai Disetujui');
                 }
             );
         } catch (\Throwable $e) {
@@ -87,7 +87,7 @@ class ApprovalController extends Controller
 
         // Log audit trail
         Log::info('Approval granted', [
-            'request_id'  => $approvalRequest->id,
+            'request_id' => $approvalRequest->id,
             'approved_by' => auth()->id(),
             'action_type' => $approvalRequest->action_type,
             'pegawai_nik' => $payload['nik'] ?? null,
@@ -112,9 +112,13 @@ class ApprovalController extends Controller
             'keterangan.required' => 'Alasan penolakan wajib diisi.',
         ]);
 
-        // If files were uploaded speculatively, delete them
         if (in_array($approvalRequest->action_type, ['create', 'update'])) {
             $payload = $approvalRequest->data_payload ?? [];
+
+            if (!empty($payload['foto'])) {
+                Storage::disk('public')->delete($payload['foto']);
+            }
+
             if (!empty($payload['file_ktp'])) {
                 Storage::disk('public')->delete($payload['file_ktp']);
             }
@@ -127,10 +131,10 @@ class ApprovalController extends Controller
         }
 
         $approvalRequest->update([
-            'status'      => 'rejected',
+            'status' => 'rejected',
             'approved_by' => auth()->id(),
             'approved_at' => now(),
-            'keterangan'  => $request->input('keterangan'),
+            'keterangan' => $request->input('keterangan'),
         ]);
 
         return back()->with('success', 'Permintaan berhasil ditolak.');
