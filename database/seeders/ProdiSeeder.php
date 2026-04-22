@@ -10,8 +10,10 @@ class ProdiSeeder extends Seeder
 {
     public function run(): void
     {
-        // Clear existing data and re-seed
+        // Disable FK checks for truncate
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
         DB::table('prodis')->truncate();
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
         $data = [
             // ── UMUM (untuk SD/SMP) ─────────────────────────────────
