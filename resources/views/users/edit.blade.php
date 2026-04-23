@@ -61,6 +61,7 @@
                             <select name="role" id="roleSelect"
                                     class="form-select @error('role') is-invalid @enderror"
                                     required {{ $user->isSuperAdmin() && $user->id === auth()->id() ? 'disabled' : '' }}>
+                                <option value="super_admin"  {{ old('role', $user->role) === 'super_admin'  ? 'selected' : '' }}>ADMIN POLDA</option>
                                 <option value="admin_satker" {{ old('role', $user->role) === 'admin_satker' ? 'selected' : '' }}>OPERATOR</option>
                             </select>
                             {{-- hidden field when disabled to keep value submitted --}}
