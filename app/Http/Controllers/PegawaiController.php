@@ -522,23 +522,29 @@ class PegawaiController extends Controller
             $this->notifyAdminSummary($request->user());
         }
 
-        // Collect row-level failures
+        // Collect row-level validation failures
         $failures = $import->failures();
-
-        if ($failures->isNotEmpty()) {
-            $errors = [];
-            foreach ($failures as $failure) {
-                $row = $failure->row();
-                $column = $failure->attribute();
-                foreach ($failure->errors() as $msg) {
-                    $errors[] = "Baris ke-{$row} (kolom '{$column}'): {$msg}";
-                }
+        $errors   = [];
+        foreach ($failures as $failure) {
+            $row    = $failure->row();
+            $column = $failure->attribute();
+            // Skip internal helper field from showing to user
+            if ($column === '__row_number') continue;
+            foreach ($failure->errors() as $msg) {
+                $errors[] = "Baris ke-{$row} (kolom '{$column}'): {$msg}";
             }
+        }
 
+        // Collect scope-violation warnings (rows blocked by satker restriction)
+        $scopeWarnings = $import->getScopeWarnings();
+
+        $allWarnings = array_merge($errors, $scopeWarnings);
+
+        if (!empty($allWarnings)) {
             return redirect()
                 ->route('pegawai.index')
-                ->with('import_errors', $errors)
-                ->with('warning', 'Import selesai dengan ' . count($errors) . ' error. Baris yang gagal dilewati.');
+                ->with('import_errors', $allWarnings)
+                ->with('warning', 'Import selesai dengan ' . count($allWarnings) . ' peringatan. Baris yang gagal/tidak sesuai satker dilewati.');
         }
 
         $isOperator = $request->user()->isAdminSatker();
@@ -556,10 +562,15 @@ class PegawaiController extends Controller
      */
     public function downloadTemplate()
     {
-        return Excel::download(
-            new PegawaiTemplateExport(),
-            'template_import_pegawai.xlsx'
-        );
+        try {
+            return Excel::download(
+                new PegawaiTemplateExport(),
+                'template_import_pegawai.xlsx'
+            );
+        } catch (\Throwable $e) {
+            \Log::error('[downloadTemplate] Gagal generate template: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Gagal mengunduh template. Silakan hubungi administrator. (' . $e->getMessage() . ')');
+        }
     }
 
     // ── AJAX endpoint for dependent dropdown ────────────────────

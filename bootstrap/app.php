@@ -11,6 +11,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->validateCsrfTokens(except: [
+            'logout',
+        ]);
+
         // Route middleware aliases (RBAC).
         // Usage example (later in routes): ->middleware(['auth', 'role:super_admin'])
         $middleware->alias([

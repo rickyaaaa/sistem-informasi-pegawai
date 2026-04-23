@@ -59,7 +59,31 @@
                         <div class="form-text">Pilih dari daftar untuk auto-isi sub-unit, atau ketik manual.</div>
                     </div>
 
-                    {{-- Sub-Unit otomatis --}}
+                    {{-- Satker Induk (opsional — terisi otomatis jika dari tombol Tambah Sub-Unit) --}}
+                    <div class="mb-4">
+                        <label for="parent_id" class="form-label fw-semibold">
+                            Satker Induk
+                            <span class="text-muted fw-normal">(opsional — kosongkan untuk Satker Induk baru)</span>
+                        </label>
+                        <select id="parent_id" name="parent_id" class="form-select">
+                            <option value="">-- Tidak Ada / Satker Utama --</option>
+                            @foreach($parents as $parent)
+                                <option value="{{ $parent->id }}"
+                                    {{ (old('parent_id', $preselectedParentId) == $parent->id) ? 'selected' : '' }}>
+                                    {{ $parent->nama_satker }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @if($preselectedParentId)
+                            <div class="form-text text-success">
+                                <i class="bi bi-info-circle me-1"></i>
+                                Sub-unit ini akan ditambahkan ke satker induk yang sudah dipilih di atas.
+                            </div>
+                        @endif
+                    </div>
+
+                    {{-- Sub-Unit otomatis (hanya tampil jika TIDAK dalam mode sub-unit) --}}
+                    @if(!$preselectedParentId)
                     <div id="sub-unit-section" class="mb-4" style="display:none;">
                         <label class="form-label fw-semibold">
                             Sub-Unit
@@ -74,11 +98,18 @@
                             {{-- Diisi via JS --}}
                         </div>
                     </div>
+                    @endif
 
                     <div class="d-flex justify-content-between align-items-center">
-                        <a href="{{ route('satker.index') }}" class="btn btn-outline-secondary">
-                            <i class="bi bi-arrow-left me-1"></i> Kembali
-                        </a>
+                        @if($preselectedParentId)
+                            <a href="{{ route('satker.edit', $preselectedParentId) }}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left me-1"></i> Kembali ke Satker Induk
+                            </a>
+                        @else
+                            <a href="{{ route('satker.index') }}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left me-1"></i> Kembali
+                            </a>
+                        @endif
                         <button type="submit" class="btn btn-primary px-4">
                             <i class="bi bi-save me-1"></i> Simpan
                         </button>

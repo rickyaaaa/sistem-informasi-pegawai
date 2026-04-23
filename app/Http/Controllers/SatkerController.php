@@ -34,22 +34,63 @@ class SatkerController extends Controller
         return view('satker.index', compact('satkers'));
     }
 
-    public function create()
+    public function create(Request $request)
     {
-        return view('satker.create');
+        $parents = Satker::whereNull('parent_id')->orderBy('nama_satker')->get();
+        // Support pre-selection of parent_id from query string (e.g. "Tambah Sub-Unit" button)
+        $preselectedParentId = $request->query('parent_id');
+
+        return view('satker.create', compact('parents', 'preselectedParentId'));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
             'nama_satker' => ['required', 'string', 'max:255'],
-            'tipe_satuan' => ['required', 'in:satker,satwil'],
-            'sub_units' => ['nullable', 'array'],
+            'tipe_satuan' => ['nullable', 'in:satker,satwil'],
+            'parent_id'   => ['nullable', 'exists:satkers,id'],
+            'sub_units'   => ['nullable', 'array'],
             'sub_units.*' => ['string', 'max:255'],
         ]);
 
         $namaNormalized = strtoupper(trim($validated['nama_satker']));
+        $parentId       = !empty($validated['parent_id']) ? (int)$validated['parent_id'] : null;
 
+        // ── Mode Sub-Unit: parent_id diberikan → tambah sub-unit ke induk yang ada ──
+        if ($parentId) {
+            $parent = Satker::findOrFail($parentId);
+
+            // Cek duplikat nama pada parent yang sama
+            $existingSub = Satker::where('parent_id', $parentId)
+                ->where('nama_satker', $namaNormalized)
+                ->first();
+
+            if ($existingSub) {
+                if ($request->ajax() || $request->wantsJson()) {
+                    return response()->json(['message' => 'already_exists'], 409);
+                }
+                return redirect()->back()
+                    ->withInput()
+                    ->withErrors(['nama_satker' => 'Sub-unit dengan nama ini sudah ada di satker induk tersebut.']);
+            }
+
+            Satker::create([
+                'nama_satker' => $namaNormalized,
+                'tipe_satuan' => $parent->tipe_satuan,
+                'level'       => 'sub',
+                'parent_id'   => $parentId,
+            ]);
+
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['message' => 'created'], 201);
+            }
+
+            return redirect()
+                ->route('satker.edit', $parentId)
+                ->with('success', "Sub-unit \"{$namaNormalized}\" berhasil ditambahkan.");
+        }
+
+        // ── Mode Induk: buat Satker Induk baru (+ sub_units opsional) ──
         // Cek duplikat induk
         $existing = Satker::whereNull('parent_id')
             ->where('nama_satker', $namaNormalized)
@@ -69,18 +110,18 @@ class SatkerController extends Controller
             $parent = Satker::create([
                 'nama_satker' => $namaNormalized,
                 'tipe_satuan' => $validated['tipe_satuan'],
-                'level' => 'induk',
-                'parent_id' => null,
+                'level'       => 'induk',
+                'parent_id'   => null,
             ]);
 
             if (!empty($validated['sub_units'])) {
                 $subs = array_map(fn($s) => [
                     'nama_satker' => strtoupper(trim($s)),
                     'tipe_satuan' => $validated['tipe_satuan'],
-                    'level' => 'sub',
-                    'parent_id' => $parent->id,
-                    'created_at' => now(),
-                    'updated_at' => now(),
+                    'level'       => 'sub',
+                    'parent_id'   => $parent->id,
+                    'created_at'  => now(),
+                    'updated_at'  => now(),
                 ], $validated['sub_units']);
 
                 Satker::insert($subs);
@@ -94,6 +135,7 @@ class SatkerController extends Controller
         return redirect()
             ->route('satker.index')
             ->with('success', 'Satker/Satwil beserta sub-unit berhasil ditambahkan.');
+
     }
 
     public function edit(Satker $satker)
@@ -126,7 +168,22 @@ class SatkerController extends Controller
 
     public function destroy(Satker $satker)
     {
-        $satker->delete(); // cascade ke children via DB foreign key
+        // ── Proteksi: hitung semua data yang akan ikut terhapus ──────────
+        $totalPegawai = $this->countPegawaiRecursive($satker);
+        $totalUsers   = $this->countUsersRecursive($satker);
+
+        if ($totalPegawai > 0 || $totalUsers > 0) {
+            $detail = [];
+            if ($totalPegawai > 0) $detail[] = "{$totalPegawai} data pegawai";
+            if ($totalUsers > 0)   $detail[] = "{$totalUsers} akun operator/user";
+            $detailStr = implode(' dan ', $detail);
+
+            return redirect()
+                ->route('satker.index')
+                ->with('error', "⛔ Satker \"{$satker->nama_satker}\" tidak dapat dihapus karena masih memiliki {$detailStr}. Hapus atau pindahkan data tersebut terlebih dahulu.");
+        }
+
+        $satker->delete(); // cascade ke children via model event
 
         return redirect()
             ->route('satker.index')
@@ -144,15 +201,59 @@ class SatkerController extends Controller
             'ids.*' => ['integer', 'exists:satkers,id'],
         ]);
 
-        // Hapus semua ID yang dipilih satu per satu agar men-trigger event 'deleting'
-        Satker::whereIn('id', $request->ids)->get()->each(function (Satker $sat) {
-            $sat->delete();
-        });
+        $satkers = Satker::whereIn('id', $request->ids)->get();
+        $blocked = [];
 
-        $count = count($request->ids);
+        foreach ($satkers as $sat) {
+            $totalPegawai = $this->countPegawaiRecursive($sat);
+            $totalUsers   = $this->countUsersRecursive($sat);
+
+            if ($totalPegawai > 0 || $totalUsers > 0) {
+                $detail = [];
+                if ($totalPegawai > 0) $detail[] = "{$totalPegawai} pegawai";
+                if ($totalUsers > 0)   $detail[] = "{$totalUsers} user";
+                $blocked[] = "\"{$sat->nama_satker}\" (" . implode(', ', $detail) . ")";
+            } else {
+                $sat->delete();
+            }
+        }
+
+        $deletedCount = count($satkers) - count($blocked);
+        $msg = "{$deletedCount} item berhasil dihapus.";
+
+        if (!empty($blocked)) {
+            $msg .= " Item berikut tidak dapat dihapus karena masih memiliki data: " . implode('; ', $blocked) . ".";
+            return redirect()->route('satker.index')->with('warning', $msg);
+        }
 
         return redirect()
             ->route('satker.index')
-            ->with('success', "{$count} item berhasil dihapus.");
+            ->with('success', $msg);
+    }
+
+    // ── Private Helpers ───────────────────────────────────────────────
+
+    /**
+     * Hitung total pegawai pada satker beserta seluruh sub-unitnya (rekursif).
+     */
+    private function countPegawaiRecursive(Satker $satker): int
+    {
+        $count = $satker->pegawais()->withTrashed()->count();
+        foreach ($satker->children as $child) {
+            $count += $this->countPegawaiRecursive($child);
+        }
+        return $count;
+    }
+
+    /**
+     * Hitung total user/operator pada satker beserta seluruh sub-unitnya (rekursif).
+     */
+    private function countUsersRecursive(Satker $satker): int
+    {
+        $count = $satker->users()->count();
+        foreach ($satker->children as $child) {
+            $count += $this->countUsersRecursive($child);
+        }
+        return $count;
     }
 }

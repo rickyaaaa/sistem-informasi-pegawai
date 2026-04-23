@@ -8,6 +8,7 @@ use App\Models\Prodi;
 use App\Models\Satker;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
@@ -24,6 +25,9 @@ class PegawaiImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnF
     private array $allowedSatkerIds;
     private bool $isAdminSatker;
     private ?int $requestedBy;
+
+    /** @var array Pesan peringatan untuk baris yang dilewati (scope/satker tidak cocok) */
+    private array $scopeWarnings = [];
 
     public function __construct()
     {
@@ -46,6 +50,14 @@ class PegawaiImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnF
     }
 
     /**
+     * Kembalikan daftar peringatan baris yang dilewati karena tidak masuk scope satker.
+     */
+    public function getScopeWarnings(): array
+    {
+        return $this->scopeWarnings;
+    }
+
+    /**
      * 11 Columns: NIK, NAMA, TGL LAHIR, JK, PENDIDIKAN, PRODI, TGL KERJA, SATKER, UNIT KERJA, STATUS, KET
      * Upsert: NIK as unique key.
      */
@@ -53,17 +65,47 @@ class PegawaiImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnF
     {
         $nik = $this->sanitizeNik($row['nik'] ?? '');
 
-        // Lookup unit kerja (sub-unit) by name
-        $unitKerja = Satker::where('nama_satker', trim($row['unit_kerja'] ?? ''))
-            ->where('level', 'sub')
-            ->first();
+        // Normalize unit_kerja: trim + uppercase agar toleran terhadap perbedaan penulisan di Excel
+        $unitKerjaName = strtoupper(trim($row['unit_kerja'] ?? ''));
 
-        if (! $unitKerja) {
-            return null; // Handled by validation
+        // Coba cari unit kerja di scope operator dulu
+        $unitKerja = null;
+        
+        $unitKerjaQuery = Satker::whereRaw('UPPER(nama_satker) = ?', [$unitKerjaName])
+            ->where('level', 'sub');
+
+        if ($this->operatorParentId) {
+            // Cari unit kerja yang memang berada di bawah induknya
+            $unitKerja = (clone $unitKerjaQuery)->whereIn('id', $this->allowedSatkerIds)->first();
+            
+            // Jika tidak ketemu di scope operator, cek apakah unit kerja itu ada di satker lain
+            if (!$unitKerja && (clone $unitKerjaQuery)->exists()) {
+                $warning = "Baris ke-" . ($row['__row_number'] ?? '?') . ": Unit Kerja '{$unitKerjaName}' tidak terdaftar di bawah Satker Anda. Baris dilewati.";
+                $this->scopeWarnings[] = $warning;
+                Log::warning('[PegawaiImport] Scope violation: ' . $warning);
+                return null;
+            }
+        } else {
+            // Jika Admin Polda, tambahkan filter berdasar kolom 'satker' jika ada di template
+            $satkerName = strtoupper(trim($row['satker'] ?? ''));
+            if ($satkerName) {
+                $indukSatker = Satker::whereRaw('UPPER(nama_satker) = ?', [$satkerName])->where('level', 'induk')->first();
+                if ($indukSatker) {
+                    $unitKerjaQuery->where('parent_id', $indukSatker->id);
+                }
+            }
+            $unitKerja = $unitKerjaQuery->first();
         }
 
-        // Operator restriction
+        if (! $unitKerja) {
+            return null; // Ditangani oleh validasi (rule 'unit_kerja.in')
+        }
+
+        // Operator restriction legacy check (can be removed as it is handled above, but left for safety)
         if ($this->operatorParentId && ! in_array($unitKerja->id, $this->allowedSatkerIds)) {
+            $warning = "Baris ke-" . ($row['__row_number'] ?? '?') . ": Unit Kerja '{$unitKerjaName}' tidak terdaftar di bawah Satker Anda. Baris dilewati.";
+            $this->scopeWarnings[] = $warning;
+            Log::warning('[PegawaiImport] Scope violation: ' . $warning);
             return null;
         }
 
@@ -129,8 +171,10 @@ class PegawaiImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnF
      */
     public function rules(): array
     {
+        // Ambil semua nama sub-satker dalam bentuk UPPERCASE agar perbandingan tidak case-sensitive
         $validSatkerNames = Satker::where('level', 'sub')
             ->pluck('nama_satker')
+            ->map(fn($n) => strtoupper(trim($n)))
             ->toArray();
 
         return [
@@ -142,6 +186,20 @@ class PegawaiImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnF
             'status'     => ['required'],
             'status_k2'  => ['nullable', Rule::in(['K-II', 'Non K-II'])],
         ];
+    }
+
+    /**
+     * Normalize data sebelum validasi dijalankan.
+     * Mengubah unit_kerja menjadi UPPERCASE agar cocok dengan daftar validasi.
+     */
+    public function prepareForValidation($data, $index)
+    {
+        if (isset($data['unit_kerja'])) {
+            $data['unit_kerja'] = strtoupper(trim($data['unit_kerja']));
+        }
+        // Simpan nomor baris untuk digunakan di pesan error scope
+        $data['__row_number'] = $index + 2; // +2 karena row 1 = heading
+        return $data;
     }
 
     public function customValidationMessages(): array
