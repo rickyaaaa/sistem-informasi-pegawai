@@ -28,7 +28,7 @@
 
         .login-card {
             width: 100%;
-            max-width: 350px;
+            max-width: 300px;
             border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 16px;
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
@@ -107,7 +107,24 @@
         }
 
         .input-group .form-control {
+            border-radius: 0 !important;
+        }
+
+        .input-group .form-control.rounded-end-custom {
             border-radius: 0 8px 8px 0 !important;
+        }
+
+        .input-group .btn-toggle-pass {
+            border-radius: 0 8px 8px 0 !important;
+            border-color: rgba(209, 213, 219, 0.7);
+            background: rgba(249, 250, 251, 0.7);
+            color: #6b7280;
+            border-left: none;
+        }
+        
+        .input-group .btn-toggle-pass:hover {
+            background: #e5e7eb;
+            color: #374151;
         }
 
         .btn-login {
@@ -215,7 +232,7 @@
                     <div class="input-group">
                         <span class="input-group-text"><i class="bi bi-person"></i></span>
                         <input type="text" id="username" name="username"
-                            class="form-control @error('username') is-invalid @enderror" value="{{ old('username') }}"
+                            class="form-control rounded-end-custom @error('username') is-invalid @enderror" value="{{ old('username') }}"
                             placeholder="Masukkan username" required autofocus autocomplete="username">
                     </div>
                 </div>
@@ -227,7 +244,10 @@
                         <span class="input-group-text"><i class="bi bi-lock"></i></span>
                         <input type="password" id="password" name="password"
                             class="form-control @error('password') is-invalid @enderror" placeholder="••••••••" required
-                            autocomplete="current-password">
+                            autocomplete="current-password" style="border-right: none;">
+                        <button class="btn btn-toggle-pass" type="button" id="togglePassword">
+                            <i class="bi bi-eye-slash" id="toggleIcon"></i>
+                        </button>
                     </div>
                 </div>
 
@@ -262,6 +282,17 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const togglePassword = document.getElementById('togglePassword');
+        const password = document.getElementById('password');
+        const toggleIcon = document.getElementById('toggleIcon');
+
+        togglePassword.addEventListener('click', function () {
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+            password.setAttribute('type', type);
+            toggleIcon.className = type === 'password' ? 'bi bi-eye-slash' : 'bi bi-eye';
+        });
+    </script>
 </body>
 
 </html>

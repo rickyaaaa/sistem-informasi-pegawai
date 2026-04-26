@@ -364,6 +364,10 @@
             --bs-pagination-hover-bg: #374151;
             --bs-pagination-hover-border-color: #4b5563;
         }
+        
+        nav p.text-muted {
+            color: #e5e7eb !important;
+        }
 
         /* ── Modals & Dropdowns ── */
         .modal-content, .dropdown-menu {
