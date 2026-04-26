@@ -201,9 +201,10 @@ class SatkerController extends Controller
             'ids.*' => ['integer', 'exists:satkers,id'],
         ]);
 
-        $satkers = Satker::whereIn('id', $request->ids)->get();
+        $satkers = Satker::query()->whereIn('id', $request->ids)->get();
         $blocked = [];
 
+        /** @var \App\Models\Satker $sat */
         foreach ($satkers as $sat) {
             $totalPegawai = $this->countPegawaiRecursive($sat);
             $totalUsers   = $this->countUsersRecursive($sat);
