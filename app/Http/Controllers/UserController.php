@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Satker;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
+
 use Illuminate\Validation\Rule;
 
 class UserController extends Controller
@@ -77,8 +77,6 @@ class UserController extends Controller
             $validated['satker_id'] = null;
         }
 
-        $validated['password'] = Hash::make($validated['password']);
-
         User::create($validated);
 
         return redirect()
@@ -120,11 +118,9 @@ class UserController extends Controller
             $validated['satker_id'] = null;
         }
 
-        // Only update password if provided
+        // Only update password if provided — hashed cast handles Hash::make() automatically
         if (empty($validated['password'])) {
             unset($validated['password']);
-        } else {
-            $validated['password'] = Hash::make($validated['password']);
         }
 
         $user->update($validated);
