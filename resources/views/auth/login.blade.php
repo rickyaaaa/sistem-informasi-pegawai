@@ -254,9 +254,12 @@
                 </div>
             </form>
 
-            <p class="text-center text-muted mt-4 mb-0" style="font-size:12px;">
-                &copy; 2026 By Universitas Teknokrat Indonesia
-            </p>
+            <div class="text-center mt-4 mb-0">
+                <img src="{{ asset('img/uti.png') }}" alt="Universitas Teknokrat Indonesia" style="height: 18px; margin-right: 6px; vertical-align: text-bottom;">
+                <span class="text-muted" style="font-size:12px;">
+                    &copy; 2026 By Universitas Teknokrat Indonesia
+                </span>
+            </div>
         </div>
     </div>
 

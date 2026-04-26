@@ -8,7 +8,7 @@
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div>
             <h5 class="fw-bold mb-0">Daftar Satker/Satwil</h5>
-            <small class="text-white">Total {{ $satkers->total() }} Satker/Satwil terdaftar</small>
+            <small class="text-muted">Total {{ $satkers->total() }} Satker/Satwil terdaftar</small>
         </div>
         <div class="d-flex gap-2">
             <a href="{{ route('satker.create') }}" class="btn btn-danger btn-sm">
@@ -83,7 +83,7 @@
                                         <input type="checkbox" class="form-check-input check-item"
                                                name="ids[]" value="{{ $satker->id }}">
                                     </td>
-                                    <td class="text-white">
+                                    <td class="text-muted">
                                         {{ ($satkers->currentPage() - 1) * $satkers->perPage() + $loop->iteration }}
                                     </td>
                                     <td>

@@ -7,7 +7,7 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
         <h5 class="fw-bold mb-0">Approval Permintaan Pegawai</h5>
-        <small class="text-white">Kelola semua permintaan create / update / delete dari admin satker</small>
+        <small class="text-muted">Kelola semua permintaan create / update / delete dari admin satker</small>
     </div>
 </div>
 
@@ -58,23 +58,23 @@
                     @forelse($requests as $req)
                         <tr>
                             {{-- No --}}
-                            <td class="text-white">
+                            <td class="text-muted">
                                 {{ ($requests->currentPage() - 1) * $requests->perPage() + $loop->iteration }}
                             </td>
 
                             {{-- Pegawai / Data --}}
                             <td>
                                 @if($req->action_type === 'create')
-                                    <span class="text-white fst-italic">(Pegawai Baru)</span>
-                                    <div class="small text-white mt-1">
+                                    <span class="text-muted fst-italic">(Pegawai Baru)</span>
+                                    <div class="small text-muted mt-1">
                                         {{ $req->data_payload['nama'] ?? '-' }}
                                         &middot; NIK: {{ $req->data_payload['nik'] ?? '-' }}
                                     </div>
                                 @elseif($req->pegawai)
-                                    <span class="fw-medium text-white">{{ $req->pegawai->nama }}</span>
-                                    <div class="small text-white">NIK: {{ $req->pegawai->nik }}</div>
+                                    <span class="fw-medium">{{ $req->pegawai->nama }}</span>
+                                    <div class="small text-muted">NIK: {{ $req->pegawai->nik }}</div>
                                 @else
-                                    <span class="text-white fst-italic">Pegawai tidak ditemukan</span>
+                                    <span class="text-muted fst-italic">Pegawai tidak ditemukan</span>
                                 @endif
                             </td>
 
@@ -104,7 +104,7 @@
                             </td>
 
                             {{-- Date --}}
-                            <td class="small text-white">
+                            <td class="small text-muted">
                                 {{ $req->created_at->format('d M Y H:i') }}
                             </td>
 
@@ -123,7 +123,7 @@
                                         <i class="bi bi-x-circle me-1"></i>Rejected
                                     </span>
                                     @if(!empty($req->keterangan))
-                                        <div class="small text-white mt-1" style="font-size:11px;">{{ $req->keterangan }}</div>
+                                        <div class="small text-muted mt-1" style="font-size:11px;">{{ $req->keterangan }}</div>
                                     @endif
                                 @endif
                             </td>
@@ -151,7 +151,7 @@
                                         </button>
                                     </div>
                                 @else
-                                    <div class="text-end small text-white lh-sm">
+                                    <div class="text-end small text-muted lh-sm">
                                         <div class="fw-medium">{{ $req->approvedBy->name ?? '-' }}</div>
                                         <div>{{ $req->approved_at?->format('d M Y H:i') }}</div>
                                     </div>
@@ -164,7 +164,7 @@
                         @if($req->action_type !== 'delete' && $req->data_payload)
                         <tr class="table-light small">
                             <td></td>
-                            <td colspan="7" class="py-2 text-white">
+                            <td colspan="7" class="py-2 text-muted">
                                 <strong>Payload:</strong>
                                 Nama: {{ $req->data_payload['nama'] ?? '-' }}
                                 &middot; NIK: {{ $req->data_payload['nik'] ?? '-' }}

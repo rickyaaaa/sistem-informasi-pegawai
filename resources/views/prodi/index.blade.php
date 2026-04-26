@@ -7,7 +7,7 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
         <h5 class="fw-bold mb-0">Daftar Program Studi</h5>
-        <small class="text-white">Total {{ $prodis->total() }} program studi terdaftar</small>
+        <small class="text-muted">Total {{ $prodis->total() }} program studi terdaftar</small>
     </div>
     <a href="{{ route('prodi.create') }}" class="btn btn-danger btn-sm">
         <i class="bi bi-plus-lg me-1"></i> Tambah Program Studi
@@ -60,7 +60,7 @@
                 <tbody>
                     @forelse($prodis as $prodi)
                         <tr>
-                            <td class="text-white">
+                            <td class="text-muted">
                                 {{ ($prodis->currentPage() - 1) * $prodis->perPage() + $loop->iteration }}
                             </td>
                             <td class="fw-medium">{{ $prodi->nama }}</td>

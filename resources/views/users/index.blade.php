@@ -7,7 +7,7 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
         <h5 class="fw-bold mb-0">Daftar Operator</h5>
-        <small class="text-white">Total {{ $users->total() }} operator terdaftar</small>
+        <small class="text-muted">Total {{ $users->total() }} operator terdaftar</small>
     </div>
     <a href="{{ route('users.create') }}" class="btn btn-danger btn-sm">
         <i class="bi bi-person-plus-fill me-1"></i> Tambah User
@@ -88,7 +88,7 @@
                                        class="form-check-input checkItem"
                                        {{ $user->isSuperAdmin() || $user->id === auth()->id() ? 'disabled' : '' }}>
                             </td>
-                            <td class="text-white">
+                            <td class="text-muted">
                                 {{ ($users->currentPage() - 1) * $users->perPage() + $loop->iteration }}
                             </td>
 

@@ -42,7 +42,7 @@
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">
                                 Password
-                                <small class="text-muted fw-normal">(kosongkan jika tidak diganti)</small>
+                                <small class="text-white fw-normal">(kosongkan jika tidak diganti)</small>
                             </label>
                             <input type="password" name="password"
                                    class="form-control @error('password') is-invalid @enderror">

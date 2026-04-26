@@ -19,8 +19,8 @@
         /* ── Base ── */
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #111827;
-            color: #e5e7eb;
+            background-color: #f3f4f6;
+            color: #111827;
         }
 
         /* ── Sidebar ── */
@@ -174,8 +174,8 @@
 
         /* ── Topbar ── */
         .topbar {
-            background: #1f2937;
-            border-bottom: 1px solid #374151;
+            background: #fff;
+            border-bottom: 1px solid #e5e7eb;
             height: 64px;
             display: flex;
             align-items: center;
@@ -184,14 +184,14 @@
             position: sticky;
             top: 0;
             z-index: 1030;
-            box-shadow: 0 1px 3px rgba(0,0,0,.3);
+            box-shadow: 0 1px 3px rgba(0,0,0,.08);
         }
 
         .topbar .page-title {
             font-size: 17px;
             font-weight: 700;
             margin: 0;
-            color: #f3f4f6;
+            color: #111827;
             text-transform: uppercase;
         }
 
@@ -229,9 +229,9 @@
             gap: 6px;
             font-size: 13px;
             font-weight: 500;
-            color: #d1d5db;
-            background: #374151;
-            border: 1px solid #4b5563;
+            color: #374151;
+            background: #f3f4f6;
+            border: 1px solid #d1d5db;
             border-radius: 8px;
             padding: 7px 14px;
             cursor: pointer;
@@ -253,11 +253,11 @@
 
         /* ── Card overrides ── */
         .card {
-            border: 1px solid #374151;
-            box-shadow: 0 4px 6px rgba(0,0,0,.3);
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 2px 6px rgba(0,0,0,.06);
             border-radius: 12px;
-            background-color: #1f2937;
-            color: #e5e7eb;
+            background-color: #fff;
+            color: #111827;
         }
 
         .card-header {
@@ -316,12 +316,12 @@
         /* ── Tables ── */
         .table {
             --bs-table-bg: transparent;
-            --bs-table-color: #e5e7eb;
-            --bs-table-border-color: #374151;
-            --bs-table-striped-color: #e5e7eb;
-            --bs-table-striped-bg: rgba(255, 255, 255, 0.02);
-            --bs-table-hover-color: #fff;
-            --bs-table-hover-bg: rgba(255, 255, 255, 0.05);
+            --bs-table-color: #111827;
+            --bs-table-border-color: #e5e7eb;
+            --bs-table-striped-color: #111827;
+            --bs-table-striped-bg: rgba(0, 0, 0, 0.02);
+            --bs-table-hover-color: #000;
+            --bs-table-hover-bg: rgba(0, 0, 0, 0.04);
         }
         
         .table > :not(caption) > * > * {
@@ -329,22 +329,22 @@
         }
 
         .table-light {
-            --bs-table-bg: #374151;
-            --bs-table-color: #e5e7eb;
-            --bs-table-border-color: #4b5563;
-            --bs-table-striped-bg: rgba(255, 255, 255, 0.05);
+            --bs-table-bg: #f9fafb;
+            --bs-table-color: #374151;
+            --bs-table-border-color: #e5e7eb;
+            --bs-table-striped-bg: rgba(0, 0, 0, 0.02);
         }
 
         /* ── Form Inputs ── */
         .form-control, .form-select, .input-group-text {
-            background-color: #374151;
-            border-color: #4b5563;
-            color: #e5e7eb;
+            background-color: #fff;
+            border-color: #d1d5db;
+            color: #111827;
         }
         .form-control:focus, .form-select:focus {
-            background-color: #4b5563;
+            background-color: #fff;
             border-color: #dc2626;
-            color: #fff;
+            color: #111827;
             box-shadow: 0 0 0 0.25rem rgba(220, 38, 38, 0.25);
         }
         .form-control::placeholder {
@@ -359,37 +359,37 @@
             --bs-pagination-hover-color: #991b1b;
             --bs-pagination-focus-color: #dc2626;
             --bs-pagination-focus-box-shadow: 0 0 0 0.25rem rgba(220, 38, 38, 0.25);
-            --bs-pagination-bg: #1f2937;
-            --bs-pagination-border-color: #374151;
-            --bs-pagination-hover-bg: #374151;
-            --bs-pagination-hover-border-color: #4b5563;
+            --bs-pagination-bg: #fff;
+            --bs-pagination-border-color: #e5e7eb;
+            --bs-pagination-hover-bg: #f3f4f6;
+            --bs-pagination-hover-border-color: #d1d5db;
         }
         
         nav p.text-muted {
-            color: #e5e7eb !important;
+            color: #6b7280 !important;
         }
 
         /* ── Modals & Dropdowns ── */
         .modal-content, .dropdown-menu {
-            background-color: #1f2937;
-            color: #e5e7eb;
-            border: 1px solid #374151;
+            background-color: #fff;
+            color: #111827;
+            border: 1px solid #e5e7eb;
         }
         .modal-header {
-            border-bottom: 1px solid #374151;
+            border-bottom: 1px solid #e5e7eb;
         }
         .modal-footer {
-            border-top: 1px solid #374151;
+            border-top: 1px solid #e5e7eb;
         }
         .btn-close {
-            filter: invert(1) grayscale(100%) brightness(200%);
+            filter: none;
         }
         .dropdown-item {
-            color: #e5e7eb;
+            color: #374151;
         }
         .dropdown-item:hover, .dropdown-item:focus {
-            background-color: #374151;
-            color: #fff;
+            background-color: #f3f4f6;
+            color: #111827;
         }
     </style>
 
@@ -407,7 +407,7 @@
         </div>
         <div class="brand-text">
             <h1>SIPNONA</h1>
-            <small>PEGAWAI NON ASN</small>
+            <small>SISTEM INFORMASI PEGAWAI NON ASN</small>
         </div>
     </a>
 
