@@ -226,18 +226,26 @@ class PegawaiImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnF
             return array_map(fn() => null, $data);
         }
 
-        // ── Deteksi NIK scientific notation (e.g. 1.23475869178262E+15) ──
+        // ── Deteksi dan perbaiki NIK ──
         if (isset($data['nik'])) {
-            $nikStr = trim((string) $data['nik']);
+            $nikRaw = $data['nik'];
 
-            // Jika mengandung 'e' atau 'E' (tanda scientific notation), tandai sebagai rusak
+            // Jika NIK datang sebagai float/integer dari PhpSpreadsheet (misal: 3.20123456789E+15),
+            // rekonstruksi menjadi string digit penuh menggunakan number_format
+            if (is_float($nikRaw) || is_int($nikRaw)) {
+                // number_format tanpa desimal → string penuh tanpa scientific notation
+                $nikStr = number_format($nikRaw, 0, '.', '');
+            } else {
+                $nikStr = trim((string) $nikRaw);
+            }
+
+            // Jika setelah konversi masih mengandung scientific notation (dari CSV string)
             if (preg_match('/[eE][+\-]/', $nikStr)) {
                 Log::warning("[PegawaiImport] Baris " . ($index + 2) . ": NIK terbaca scientific notation '{$nikStr}'");
-                // Set ke string khusus agar gagal validasi regex dengan pesan kustom
                 $data['nik'] = 'SCIENTIFIC_NOTATION_ERROR';
             } else {
-                // Pastikan NIK selalu string (bukan float/int dari Excel)
-                $data['nik'] = (string) $nikStr;
+                // Pastikan NIK selalu string murni
+                $data['nik'] = $nikStr;
             }
         }
 

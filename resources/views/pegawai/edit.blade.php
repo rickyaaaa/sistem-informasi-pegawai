@@ -41,8 +41,8 @@
                             <i class="bi bi-arrow-left me-1"></i> Kembali
                         </a>
                         @if(auth()->user()->isAdminSatker())
-                            <button type="submit" class="btn btn-warning px-4">
-                                <i class="bi bi-send me-1"></i> Kirim untuk Persetujuan
+                            <button type="submit" class="btn btn-danger px-4">
+                                <i class="bi bi-send-check me-1"></i> Kirim Persetujuan
                             </button>
                         @else
                             <button type="submit" class="btn btn-danger px-4">

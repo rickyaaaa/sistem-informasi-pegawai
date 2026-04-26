@@ -41,8 +41,13 @@
     {{-- Tanggal Lahir --}}
     <div class="col-md-6">
         <label class="form-label">Tanggal Lahir</label>
-        <input type="date" name="tgl_lahir" class="form-control"
+        {{-- Hidden input yang menyimpan nilai Y-m-d untuk backend --}}
+        <input type="hidden" name="tgl_lahir" id="tgl_lahir_hidden"
                value="{{ old('tgl_lahir', isset($pegawai) && $pegawai->tgl_lahir ? $pegawai->tgl_lahir->format('Y-m-d') : '') }}">
+        {{-- Input tampilan Flatpickr --}}
+        <input type="text" id="tgl_lahir_picker" class="form-control"
+               placeholder="Pilih tanggal lahir..."
+               autocomplete="off" readonly>
     </div>
 
     {{-- Jenis Kelamin --}}
@@ -90,8 +95,13 @@
     {{-- Tanggal Mulai Kerja --}}
     <div class="col-md-6">
         <label class="form-label">Tanggal Mulai Kerja</label>
-        <input type="date" name="tgl_kerja" class="form-control"
+        {{-- Hidden input yang menyimpan nilai Y-m-d untuk backend --}}
+        <input type="hidden" name="tgl_kerja" id="tgl_kerja_hidden"
                value="{{ old('tgl_kerja', isset($pegawai) && $pegawai->tgl_kerja ? $pegawai->tgl_kerja->format('Y-m-d') : '') }}">
+        {{-- Input tampilan Flatpickr --}}
+        <input type="text" id="tgl_kerja_picker" class="form-control"
+               placeholder="Pilih tanggal mulai kerja..."
+               autocomplete="off" readonly>
     </div>
 
     {{-- Status --}}
@@ -217,12 +227,14 @@
 
 </div>
 
-<div class="mt-4 d-flex gap-2">
-    <button type="submit" class="btn btn-danger">Simpan</button>
-    <a href="{{ route('pegawai.index') }}" class="btn btn-outline-secondary">Kembali</a>
-</div>
 
-{{-- ═══════════════ JAVASCRIPT ═══════════════ --}}
+{{-- Flatpickr CSS --}}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+{{-- Flatpickr JS --}}
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+{{-- Flatpickr Locale Indonesia --}}
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 
@@ -238,6 +250,52 @@ document.addEventListener('DOMContentLoaded', function () {
     const statusK2Sel      = document.getElementById('status_k2');
     const nomorK2Wrap      = document.getElementById('nomor_k2_wrapper');
     const nomorK2Inp       = document.getElementById('nomor_k2');
+
+    // ── Flatpickr Date Pickers ──────────────────────────────────
+    const flatpickrConfig = {
+        locale: 'id',
+        dateFormat: 'd/m/Y',        // tampilan ke user
+        altInput: false,
+        allowInput: false,
+        disableMobile: true,        // gunakan flatpickr juga di mobile, bukan native
+        maxDate: 'today',
+        onChange: function (selectedDates, dateStr, instance) {
+            // Tulis ke hidden input dalam format Y-m-d untuk backend
+            if (selectedDates.length > 0) {
+                const d = selectedDates[0];
+                const yyyy = d.getFullYear();
+                const mm   = String(d.getMonth() + 1).padStart(2, '0');
+                const dd   = String(d.getDate()).padStart(2, '0');
+                instance._hiddenInput.value = `${yyyy}-${mm}-${dd}`;
+            } else {
+                instance._hiddenInput.value = '';
+            }
+        }
+    };
+
+    // Helper: inisialisasi flatpickr dengan nilai dari hidden input
+    function initDatePicker(pickerId, hiddenId) {
+        const hidden = document.getElementById(hiddenId);
+        const picker = document.getElementById(pickerId);
+        if (!picker || !hidden) return;
+
+        const fp = flatpickr(picker, flatpickrConfig);
+        fp._hiddenInput = hidden;
+
+        // Set nilai awal dari hidden input (format Y-m-d)
+        if (hidden.value) {
+            const parts = hidden.value.split('-'); // [Y, m, d]
+            if (parts.length === 3) {
+                // Flatpickr setDate menerima format sesuai dateFormat
+                fp.setDate(`${parts[2]}/${parts[1]}/${parts[0]}`, false);
+            }
+        }
+    }
+
+    initDatePicker('tgl_lahir_picker', 'tgl_lahir_hidden');
+    initDatePicker('tgl_kerja_picker', 'tgl_kerja_hidden');
+
+    // ── End Flatpickr ───────────────────────────────────────────
 
     const preSelectedSatker = "{{ old('satker_id', $pegawai->satker_id ?? '') }}";
     const preSelectedProdi  = "{{ old('prodi_id', $pegawai->prodi_id ?? '') }}";

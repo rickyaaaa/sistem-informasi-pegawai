@@ -391,6 +391,35 @@
             background-color: #f3f4f6;
             color: #111827;
         }
+
+        /* ── Flatpickr Date Picker Overrides ── */
+        .flatpickr-day.selected,
+        .flatpickr-day.selected:hover {
+            background: #dc2626 !important;
+            border-color: #dc2626 !important;
+        }
+        .flatpickr-day:hover {
+            background: #fee2e2 !important;
+            border-color: #fca5a5 !important;
+            color: #991b1b !important;
+        }
+        .flatpickr-months .flatpickr-month,
+        .flatpickr-current-month,
+        .flatpickr-weekdays,
+        span.flatpickr-weekday {
+            background: #dc2626 !important;
+            color: #fff !important;
+            fill: #fff !important;
+        }
+        .flatpickr-calendar {
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+            border: 1px solid #e5e7eb;
+        }
+        .flatpickr-input[readonly] {
+            background-color: #fff !important;
+            cursor: pointer;
+        }
     </style>
 
     @stack('styles')
