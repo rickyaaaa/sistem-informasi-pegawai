@@ -15,15 +15,6 @@
                 <form method="POST" action="{{ route('prodi.store') }}">
                     @csrf
 
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Nama Program Studi <span class="text-danger">*</span></label>
-                        <input type="text" name="nama"
-                               class="form-control @error('nama') is-invalid @enderror"
-                               value="{{ old('nama') }}" required autofocus
-                               placeholder="Contoh: Teknik Informatika">
-                        @error('nama') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                    </div>
-
                     <div class="mb-4">
                         <label class="form-label fw-semibold">Kategori <span class="text-danger">*</span></label>
                         <select name="kategori" class="form-select @error('kategori') is-invalid @enderror" required>
@@ -33,6 +24,15 @@
                             <option value="Perguruan Tinggi" {{ old('kategori') === 'Perguruan Tinggi' ? 'selected' : '' }}>Perguruan Tinggi (D3, S1, S2, S3)</option>
                         </select>
                         @error('kategori') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Nama Program Studi <span class="text-danger">*</span></label>
+                        <input type="text" name="nama"
+                               class="form-control @error('nama') is-invalid @enderror"
+                               value="{{ old('nama') }}" required autofocus
+                               placeholder="Contoh: Teknik Informatika">
+                        @error('nama') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
 
                     <div class="d-flex justify-content-end gap-2">

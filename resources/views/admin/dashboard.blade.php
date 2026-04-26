@@ -477,10 +477,10 @@
                                 <div class="info">
                                     <div class="info-name">{{ $p->nama }}</div>
                                     <div class="info-sub">
-                                        {{ strtoupper($p->pendidikan) }} / {{ $p->nik }}
+                                        {{ strtoupper($p->pendidikan) }} / {{ strtoupper($p->prodi->nama ?? '-') }}
                                     </div>
                                     <div class="info-muted">
-                                        {{ $p->satker?->nama_satker ?? '-' }} <br>
+                                        {{ $p->satker?->level === 'sub' ? strtoupper($p->satker?->parent?->nama_satker ?? '-') . ' - ' . strtoupper($p->satker?->nama_satker) : strtoupper($p->satker?->nama_satker ?? '-') }} <br>
                                         Status: {{ ucfirst($p->status) }}
                                     </div>
                                 </div>
@@ -513,7 +513,7 @@
             <div class="dt-toolbar">
                 <div>
                     <span class="text-white" style="font-size:13px;">Show</span>
-                    <select class="form-select form-select-sm d-inline-block w-auto mx-1" onchange="window.location.href = '?per_page=' + this.value + '&{{ http_build_query(request()->except(['per_page', 'page'])) }}'">
+                    <select class="form-select form-select-sm d-inline-block w-auto mx-1" onchange="window.location.href = '?per_page=' + this.value + '&{{ http_build_query(request()->except(['per_page', 'page'])) }}#ekspor-pane'">
                         <option value="10" {{ request('per_page', 10) == '10' ? 'selected' : '' }}>10</option>
                         <option value="25" {{ request('per_page') == '25' ? 'selected' : '' }}>25</option>
                         <option value="50" {{ request('per_page') == '50' ? 'selected' : '' }}>50</option>
@@ -737,6 +737,30 @@ new Chart(document.getElementById('pendidikanChart'), {
         plugins: { legend: { display: false } },
         scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
     }
+});
+
+// Tab preservation on reload
+document.addEventListener('DOMContentLoaded', function() {
+    let hash = window.location.hash;
+    if (hash) {
+        let triggerEl = document.querySelector('button[data-bs-target="' + hash + '"]');
+        if (triggerEl) {
+            let tab = new bootstrap.Tab(triggerEl);
+            tab.show();
+        }
+    }
+
+    let tabEls = document.querySelectorAll('button[data-bs-toggle="tab"]');
+    tabEls.forEach(function(el) {
+        el.addEventListener('shown.bs.tab', function (event) {
+            let target = event.target.getAttribute('data-bs-target');
+            if(history.pushState) {
+                history.pushState(null, null, target);
+            } else {
+                window.location.hash = target;
+            }
+        });
+    });
 });
 </script>
 

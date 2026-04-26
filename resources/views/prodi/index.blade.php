@@ -51,8 +51,8 @@
                 <thead class="table-light small text-muted">
                     <tr>
                         <th style="width:50px;">#</th>
-                        <th>Nama Program Studi</th>
                         <th style="width:180px;">Kategori</th>
+                        <th>Nama Program Studi</th>
                         <th style="width:100px;">Pegawai</th>
                         <th class="text-end" style="width:120px;">Aksi</th>
                     </tr>
@@ -63,7 +63,6 @@
                             <td class="text-muted">
                                 {{ ($prodis->currentPage() - 1) * $prodis->perPage() + $loop->iteration }}
                             </td>
-                            <td class="fw-medium">{{ $prodi->nama }}</td>
                             <td>
                                 @if($prodi->kategori === 'Perguruan Tinggi')
                                     <span class="badge bg-danger-subtle text-danger border border-danger-subtle">Perguruan Tinggi</span>
@@ -73,6 +72,7 @@
                                     <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">{{ $prodi->kategori }}</span>
                                 @endif
                             </td>
+                            <td class="fw-medium">{{ $prodi->nama }}</td>
                             <td>
                                 <span class="badge bg-light text-dark border">{{ $prodi->pegawais()->count() }}</span>
                             </td>
