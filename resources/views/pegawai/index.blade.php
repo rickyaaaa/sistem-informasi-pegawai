@@ -121,6 +121,7 @@
                         <th>NAMA</th>
                         <th>NIK</th>
                         <th>PENDIDIKAN</th>
+                        <th>PRODI</th>
                         <th>SATKER/SATWIL</th>
                         <th>SUB/BAG</th>
                         <th class="text-end" style="width:120px;">ACTION</th>
@@ -147,6 +148,9 @@
 
                             {{-- PENDIDIKAN --}}
                             <td>{{ strtoupper($pegawai->pendidikan) }}</td>
+
+                            {{-- PRODI --}}
+                            <td>{{ strtoupper($pegawai->prodi->nama ?? '-') }}</td>
 
                             {{-- SATKER/SATWIL dan SUB --}}
                             @php

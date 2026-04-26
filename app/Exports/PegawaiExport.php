@@ -15,10 +15,12 @@ use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 class PegawaiExport implements FromQuery, WithHeadings, WithMapping, WithColumnFormatting, ShouldAutoSize
 {
     protected User $user;
+    protected array $filters;
 
-    public function __construct(User $user)
+    public function __construct(User $user, array $filters = [])
     {
         $this->user = $user;
+        $this->filters = $filters;
     }
 
     public function query()
@@ -27,8 +29,26 @@ class PegawaiExport implements FromQuery, WithHeadings, WithMapping, WithColumnF
 
         if ($this->user->isAdminSatker()) {
             $subIds = Satker::where('parent_id', $this->user->satker_id)
+                ->orWhere('id', $this->user->satker_id)
                 ->pluck('id');
             $query->whereIn('satker_id', $subIds);
+        }
+
+        // Apply filters
+        if (!empty($this->filters['q'])) {
+            $q = $this->filters['q'];
+            $query->where(function ($w) use ($q) {
+                $w->where('nama', 'LIKE', "%{$q}%")
+                  ->orWhere('nik', 'LIKE', "%{$q}%");
+            });
+        }
+
+        if (!empty($this->filters['satker_id_search'])) {
+            $query->where('satker_id', $this->filters['satker_id_search']);
+        }
+
+        if (!empty($this->filters['pendidikan_search'])) {
+            $query->where('pendidikan', $this->filters['pendidikan_search']);
         }
 
         return $query->orderBy('nama');

@@ -496,7 +496,7 @@ class PegawaiController extends Controller
     public function export(Request $request)
     {
         return Excel::download(
-            new PegawaiExport(auth()->user()),
+            new PegawaiExport(auth()->user(), $request->all()),
             'data_pegawai_' . date('Y-m-d') . '.xlsx'
         );
     }
@@ -523,16 +523,26 @@ class PegawaiController extends Controller
         }
 
         // Collect row-level validation failures
-        $failures  = $import->failures();
-        $emptyRows = $import->getEmptyRows(); // Baris kosong yang harus diabaikan
-        $errors    = [];
+        $failures = $import->failures();
+        $errors   = [];
+        
         foreach ($failures as $failure) {
             $row    = $failure->row();
             $column = $failure->attribute();
+            
             // Skip internal helper field from showing to user
             if ($column === '__row_number') continue;
-            // Skip error dari baris kosong (sudah ditandai di PegawaiImport)
-            if (in_array($row, $emptyRows)) continue;
+            
+            // Periksa apakah baris ini sebenarnya kosong (Semua kolom penting kosong)
+            $values = $failure->values();
+            $isEmptyRow = empty(trim($values['nik'] ?? '')) 
+                       && empty(trim($values['nama'] ?? '')) 
+                       && empty(trim($values['unit_kerja'] ?? ''));
+                       
+            if ($isEmptyRow) {
+                continue; // Jangan tampilkan error untuk baris yang kosong
+            }
+
             foreach ($failure->errors() as $msg) {
                 $errors[] = "Baris ke-{$row} (kolom '{$column}'): {$msg}";
             }

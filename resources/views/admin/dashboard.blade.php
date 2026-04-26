@@ -242,19 +242,19 @@
     .pegawai-card .info-name {
         font-size: 15px;
         font-weight: 700;
-        color: #111827;
+        color: #f9fafb;
         margin-bottom: 2px;
         text-transform: uppercase;
     }
     .pegawai-card .info-sub {
         font-size: 12px;
-        color: #4b5563;
+        color: #d1d5db;
         font-weight: 600;
         margin-bottom: 4px;
     }
     .pegawai-card .info-muted {
         font-size: 11px;
-        color: #6b7280;
+        color: #9ca3af;
     }
     .pegawai-card .actions {
         display: flex;
@@ -512,13 +512,14 @@
 
             <div class="dt-toolbar">
                 <div>
-                    <span class="text-muted" style="font-size:13px;">Show</span>
-                    <select class="form-select form-select-sm d-inline-block w-auto mx-1">
-                        <option>10</option>
-                        <option>25</option>
-                        <option>50</option>
+                    <span class="text-white" style="font-size:13px;">Show</span>
+                    <select class="form-select form-select-sm d-inline-block w-auto mx-1" onchange="window.location.href = '?per_page=' + this.value + '&{{ http_build_query(request()->except(['per_page', 'page'])) }}'">
+                        <option value="10" {{ request('per_page', 10) == '10' ? 'selected' : '' }}>10</option>
+                        <option value="25" {{ request('per_page') == '25' ? 'selected' : '' }}>25</option>
+                        <option value="50" {{ request('per_page') == '50' ? 'selected' : '' }}>50</option>
+                        <option value="all" {{ request('per_page') == 'all' ? 'selected' : '' }}>All</option>
                     </select>
-                    <span class="text-muted" style="font-size:13px;">entries</span>
+                    <span class="text-white" style="font-size:13px;">entries</span>
                 </div>
                 <div class="d-flex gap-2">
                     <a href="{{ route('pegawai.export') }}?type=pdf&{{ http_build_query(request()->except('page')) }}" class="btn btn-sm btn-danger fw-bold" style="font-size:12px;">PDF Singkat</a>
@@ -526,15 +527,17 @@
                 </div>
             </div>
 
-            <div class="table-responsive border rounded">
-                <table class="table table-hover mb-0 align-middle table-sm" style="font-size:13px;">
-                    <thead class="table-light">
+            <div class="table-responsive border rounded border-secondary">
+                <table class="table table-hover mb-0 align-middle table-sm text-white" style="font-size:13px;">
+                    <thead class="table-dark">
                         <tr>
                             <th class="text-center" style="width:40px;"><input type="checkbox" class="form-check-input"></th>
                             <th style="width:50px;">NO</th>
                             <th>NAMA</th>
-                            <th>NIK</th>
+                            <th>JENIS KELAMIN</th>
                             <th>PENDIDIKAN</th>
+                            <th>PRODI</th>
+                            <th>UMUR</th>
                             <th>SATKER/SATWIL</th>
                             <th>SUB/BAG</th>
                             <th class="text-center" style="width:80px;">ACTION</th>
@@ -544,14 +547,16 @@
                         @forelse($searchResults as $i => $p)
                             <tr>
                                 <td class="text-center"><input type="checkbox" class="form-check-input" name="export_ids[]" value="{{ $p->id }}"></td>
-                                <td>{{ $searchResults->firstItem() + $loop->index }}</td>
-                                <td class="fw-semibold text-uppercase">{{ $p->nama }}</td>
-                                <td class="text-uppercase">{{ $p->nik }}</td>
-                                <td class="text-uppercase">{{ $p->pendidikan }}</td>
-                                <td class="text-uppercase" style="max-width:200px;">
+                                <td class="text-white">{{ $searchResults->firstItem() + $loop->index }}</td>
+                                <td class="fw-semibold text-uppercase text-white">{{ $p->nama }}</td>
+                                <td class="text-uppercase text-white">{{ $p->jenis_kelamin ?? '-' }}</td>
+                                <td class="text-uppercase text-white">{{ $p->pendidikan }}</td>
+                                <td class="text-uppercase text-white">{{ $p->prodi->nama ?? '-' }}</td>
+                                <td class="text-white">{{ $p->tgl_lahir ? \Carbon\Carbon::parse($p->tgl_lahir)->age . ' Tahun' : '-' }}</td>
+                                <td class="text-uppercase text-white" style="max-width:200px;">
                                     {{ $p->satker?->level === 'sub' ? strtoupper($p->satker?->parent?->nama_satker ?? '-') : strtoupper($p->satker?->nama_satker ?? '-') }}
                                 </td>
-                                <td class="text-uppercase text-muted" style="max-width:180px; font-size:12px;">
+                                <td class="text-uppercase" style="color:#d1d5db; max-width:180px; font-size:12px;">
                                     {{ $p->satker?->level === 'sub' ? strtoupper($p->satker?->nama_satker) : '-' }}
                                 </td>
                                 <td class="text-center">
@@ -567,7 +572,7 @@
             </div>
 
             <div class="d-flex justify-content-between align-items-center mt-3">
-                <div class="text-muted" style="font-size:13px;">
+                <div class="text-white" style="font-size:13px;">
                     Showing {{ $searchResults->firstItem() ?? 0 }} to {{ $searchResults->lastItem() ?? 0 }} of {{ $searchResults->total() }} entries
                 </div>
                 @if($searchResults->hasPages())

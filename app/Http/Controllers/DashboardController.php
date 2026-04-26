@@ -134,7 +134,15 @@ class DashboardController extends Controller
                 $q->where('tgl_lahir', '>=', $batas);
             }
 
-            $searchResults = $q->orderBy('nama')->paginate(15)->withQueryString();
+            // Determine per_page limit
+            $perPage = $request->input('per_page', 10);
+            if ($perPage === 'all') {
+                $perPage = $q->count() > 0 ? $q->count() : 1;
+            } else {
+                $perPage = (int) $perPage;
+            }
+
+            $searchResults = $q->orderBy('nama')->paginate($perPage)->withQueryString();
         }
 
         return view('admin.dashboard', compact(

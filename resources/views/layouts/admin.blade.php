@@ -411,6 +411,10 @@
             color: #fff !important;
             fill: #fff !important;
         }
+        .flatpickr-current-month .flatpickr-monthDropdown-months option {
+            color: #111827 !important;
+            background-color: #fff !important;
+        }
         .flatpickr-calendar {
             border-radius: 12px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.12);

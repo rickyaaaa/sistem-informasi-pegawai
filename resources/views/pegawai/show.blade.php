@@ -54,6 +54,11 @@
                         <input type="hidden" name="pendidikan" value="{{ $pegawai->pendidikan }}">
                         <input type="hidden" name="satker_id" value="{{ $pegawai->satker_id }}">
                         <input type="hidden" name="status" value="{{ $pegawai->status }}">
+                        <input type="hidden" name="status_k2" value="{{ $pegawai->status_k2 }}">
+                        <input type="hidden" name="nomor_k2" value="{{ $pegawai->nomor_k2 }}">
+                        <input type="hidden" name="tgl_lahir" value="{{ $pegawai->tgl_lahir ? $pegawai->tgl_lahir->format('Y-m-d') : '' }}">
+                        <input type="hidden" name="tgl_kerja" value="{{ $pegawai->tgl_kerja ? $pegawai->tgl_kerja->format('Y-m-d') : '' }}">
+                        <input type="hidden" name="prodi_id" value="{{ $pegawai->prodi_id }}">
 
                         <label class="btn btn-outline-primary btn-sm w-100 mb-2" for="fotoChangeInput">
                             <i class="bi bi-camera me-1"></i> Ganti Foto
@@ -112,6 +117,10 @@
                         <div class="text-muted small mb-1">Pendidikan Terakhir</div>
                         <div class="fw-medium">{{ $pegawai->pendidikan }}</div>
                     </div>
+                    <div class="col-sm-6">
+                        <div class="text-muted small mb-1">Program Studi</div>
+                        <div class="fw-medium">{{ $pegawai->prodi->nama ?? '-' }}</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -126,8 +135,16 @@
             <div class="card-body">
                 <div class="row g-3">
                     <div class="col-sm-6">
-                        <div class="text-muted small mb-1">Satker / Unit Kerja</div>
-                        <div class="fw-medium">{{ $pegawai->satker->nama_satker ?? '-' }}</div>
+                        <div class="text-muted small mb-1">Satker / Satwil</div>
+                        <div class="fw-medium text-uppercase">
+                            {{ $pegawai->satker?->level === 'sub' ? ($pegawai->satker?->parent?->nama_satker ?? '-') : ($pegawai->satker?->nama_satker ?? '-') }}
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="text-muted small mb-1">Unit Kerja</div>
+                        <div class="fw-medium text-uppercase">
+                            {{ $pegawai->satker?->level === 'sub' ? ($pegawai->satker?->nama_satker ?? '-') : '-' }}
+                        </div>
                     </div>
                     <div class="col-sm-6">
                         <div class="text-muted small mb-1">Status</div>
