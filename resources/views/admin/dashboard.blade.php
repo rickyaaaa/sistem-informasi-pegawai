@@ -300,7 +300,17 @@
 
 @section('content')
 
-<h4 class="fw-bold mb-4">Overview</h4>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold mb-0">Overview</h4>
+    <a href="{{ route('dashboard.refresh-cache') }}"
+       id="btn-refresh-cache"
+       class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-2"
+       style="font-size:13px; font-weight:600; letter-spacing:.3px;"
+       title="Paksa muat ulang statistik dari database">
+        <i class="bi bi-arrow-clockwise"></i>
+        Refresh Data
+    </a>
+</div>
 
 {{-- ════════════════════════════════════════════════════════
      PANEL PENCARIAN CANGGIH

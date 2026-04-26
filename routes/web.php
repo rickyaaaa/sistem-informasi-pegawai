@@ -28,6 +28,10 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
+Route::get('/dashboard/refresh-cache', [DashboardController::class, 'refreshCache'])
+    ->middleware(['auth', 'verified'])
+    ->name('dashboard.refresh-cache');
+
 /*
 |--------------------------------------------------------------------------
 | Authenticated User

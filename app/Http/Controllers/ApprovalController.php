@@ -6,6 +6,7 @@ use App\Models\PegawaiRequest;
 use App\Models\Pegawai;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
@@ -60,6 +61,12 @@ class ApprovalController extends Controller
         } catch (\Throwable $e) {
             return back()->with('error', 'Gagal memproses permintaan: ' . $e->getMessage());
         }
+
+        // ── Invalidate dashboard caches for both operator & admin ──
+        Cache::forget("dashboard_stats_{$approvalRequest->requested_by}");
+        Cache::forget("dashboard_pendidikan_{$approvalRequest->requested_by}");
+        Cache::forget('dashboard_stats_' . auth()->id());
+        Cache::forget('dashboard_pendidikan_' . auth()->id());
 
         // ── Email di luar transaksi (non-kritis, tidak boleh rollback approval) ──
         $actionLabel = $approvalRequest->actionLabel();
@@ -136,6 +143,12 @@ class ApprovalController extends Controller
             'approved_at' => now(),
             'keterangan' => $request->input('keterangan'),
         ]);
+
+        // ── Invalidate dashboard caches for both operator & admin ──
+        Cache::forget("dashboard_stats_{$approvalRequest->requested_by}");
+        Cache::forget("dashboard_pendidikan_{$approvalRequest->requested_by}");
+        Cache::forget('dashboard_stats_' . auth()->id());
+        Cache::forget('dashboard_pendidikan_' . auth()->id());
 
         return back()->with('success', 'Permintaan berhasil ditolak.');
     }

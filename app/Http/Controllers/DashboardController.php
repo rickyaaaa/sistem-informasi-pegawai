@@ -6,7 +6,6 @@ use App\Models\Pegawai;
 use App\Models\Satker;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class DashboardController extends Controller
@@ -16,10 +15,18 @@ class DashboardController extends Controller
         $user = $request->user();
 
         // ── Statistik (dengan Caching & Single Query) ─────────
-        $stats = Cache::remember("dashboard_stats_{$user->id}", now()->addMinutes(10), function () use ($user) {
+        $stats = Cache::remember("dashboard_stats_{$user->id}", now()->addMinutes(2), function () use ($user) {
             $baseQuery = Pegawai::query()
-                ->leftJoin('satkers', 'pegawais.satker_id', '=', 'satkers.id')
-                ->leftJoin('satkers as induk', DB::raw('COALESCE(satkers.parent_id, satkers.id)'), '=', 'induk.id');
+                ->join('satkers as s', 'pegawais.satker_id', '=', 's.id')
+                ->leftJoin('satkers as induk', function ($join) {
+                    // If pegawai is in a sub-unit, join to its parent (the induk).
+                    // If pegawai is already in an induk satker, self-join.
+                    $join->on('induk.id', '=', 's.parent_id')
+                         ->orWhere(function ($q) {
+                             $q->whereNull('s.parent_id')
+                               ->whereRaw('induk.id = s.id');
+                         });
+                });
 
             if ($user->isAdminSatker()) {
                 $allowedIds = Satker::where('parent_id', $user->satker_id)
@@ -55,7 +62,7 @@ class DashboardController extends Controller
         $pegawaiSatwilPria   = (int) $stats->satwil_pria;
         $pegawaiSatwilWanita = (int) $stats->satwil_wanita;
 
-        $pendidikanStats = Cache::remember("dashboard_pendidikan_{$user->id}", now()->addMinutes(10), function () use ($user) {
+        $pendidikanStats = Cache::remember("dashboard_pendidikan_{$user->id}", now()->addMinutes(2), function () use ($user) {
             $query = Pegawai::query();
             if ($user->isAdminSatker()) {
                 $allowedIds = Satker::where('parent_id', $user->satker_id)
@@ -148,5 +155,18 @@ class DashboardController extends Controller
             'searchResults',
             'searchPerformed'
         ));
+    }
+
+    /**
+     * Clear dashboard cache for the current user and redirect back.
+     * Used by the "Refresh Data" button on the dashboard.
+     */
+    public function refreshCache(Request $request)
+    {
+        $userId = $request->user()->id;
+        Cache::forget("dashboard_stats_{$userId}");
+        Cache::forget("dashboard_pendidikan_{$userId}");
+
+        return redirect()->route('dashboard')->with('success', '✅ Data berhasil diperbarui.');
     }
 }
