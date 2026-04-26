@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login &mdash; HRM System</title>
+    <title>Login &mdash; SIPNONA</title>
 
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -17,7 +18,8 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #1e2a3b 0%, #2d3f57 50%, #1e2a3b 100%);
+            background: linear-gradient(rgba(30, 42, 59, 0.6), rgba(45, 63, 87, 0.6)), url('{{ asset('img/sipnona.png') }}') no-repeat center center fixed;
+            background-size: cover;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -40,17 +42,18 @@
         }
 
         .login-header .brand-icon {
-            width: 56px;
-            height: 56px;
-            background: rgba(255, 255, 255, .15);
-            border-radius: 14px;
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 16px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
-            color: #fff;
-            margin: 0 auto 16px;
-            backdrop-filter: blur(8px);
+        }
+
+        .login-header .brand-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
         }
 
         .login-header h1 {
@@ -146,98 +149,113 @@
             font-size: 13px;
             margin-bottom: 20px;
         }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 576px) {
+            .login-card {
+                max-width: 90%;
+                margin: 0 auto;
+            }
+
+            .login-body {
+                padding: 24px;
+            }
+
+            .login-header {
+                padding: 24px 20px 20px;
+            }
+        }
     </style>
 </head>
+
 <body>
 
-<div class="login-card card">
+    <div class="login-card card">
 
-    {{-- Header --}}
-    <div class="login-header">
-        <div class="brand-icon">
-            <i class="bi bi-grid-1x2-fill"></i>
+        {{-- Header --}}
+        <div class="login-header">
+            <div class="brand-icon">
+                <img src="{{ asset('img/logo.png') }}" alt="Logo SIPNONA">
+            </div>
+            <h1>SIPNONA</h1>
+            <p>SISTEM INFORMASI PEGAWAI NON ASN</p>
         </div>
-        <h1>HRM System</h1>
-        <p>Sistem Informasi Kepegawaian</p>
+
+        {{-- Body --}}
+        <div class="login-body">
+
+            {{-- Session status (e.g. inactive account message) --}}
+            @if(session('status'))
+                <div class="alert-error mb-3">
+                    <i class="bi bi-info-circle me-1"></i>
+                    {{ session('status') }}
+                </div>
+            @endif
+
+            {{-- Validation errors --}}
+            @if($errors->any())
+                <div class="alert-error">
+                    <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                    {{ $errors->first() }}
+                </div>
+            @endif
+
+            <form method="POST" action="{{ route('login') }}">
+                @csrf
+
+                {{-- Username --}}
+                <div class="mb-3">
+                    <label for="username" class="form-label">Username</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-person"></i></span>
+                        <input type="text" id="username" name="username"
+                            class="form-control @error('username') is-invalid @enderror" value="{{ old('username') }}"
+                            placeholder="Masukkan username" required autofocus autocomplete="username">
+                    </div>
+                </div>
+
+                {{-- Password --}}
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                        <input type="password" id="password" name="password"
+                            class="form-control @error('password') is-invalid @enderror" placeholder="••••••••" required
+                            autocomplete="current-password">
+                    </div>
+                </div>
+
+                {{-- Remember me --}}
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="remember" name="remember">
+                        <label class="form-check-label" for="remember" style="font-size:13px;color:#6b7280;">
+                            Ingat saya
+                        </label>
+                    </div>
+
+                    @if(Route::has('password.request'))
+                        <a href="{{ route('password.request') }}" class="forgot-link">
+                            Lupa password?
+                        </a>
+                    @endif
+                </div>
+
+                {{-- Submit --}}
+                <button type="submit" class="btn btn-login">
+                    <i class="bi bi-box-arrow-in-right me-2"></i>
+                    Masuk ke Sistem
+                </button>
+
+            </form>
+
+            <p class="text-center text-muted mt-4 mb-0" style="font-size:12px;">
+                &copy; 2026 By Universitas Teknokrat Indonesia
+            </p>
+        </div>
     </div>
 
-    {{-- Body --}}
-    <div class="login-body">
-
-        {{-- Session status (e.g. inactive account message) --}}
-        @if(session('status'))
-            <div class="alert-error mb-3">
-                <i class="bi bi-info-circle me-1"></i>
-                {{ session('status') }}
-            </div>
-        @endif
-
-        {{-- Validation errors --}}
-        @if($errors->any())
-            <div class="alert-error">
-                <i class="bi bi-exclamation-triangle-fill me-1"></i>
-                {{ $errors->first() }}
-            </div>
-        @endif
-
-        <form method="POST" action="{{ route('login') }}">
-            @csrf
-
-            {{-- Username --}}
-            <div class="mb-3">
-                <label for="username" class="form-label">Username</label>
-                <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-person"></i></span>
-                    <input type="text" id="username" name="username"
-                           class="form-control @error('username') is-invalid @enderror"
-                           value="{{ old('username') }}"
-                           placeholder="Masukkan username"
-                           required autofocus autocomplete="username">
-                </div>
-            </div>
-
-            {{-- Password --}}
-            <div class="mb-3">
-                <label for="password" class="form-label">Password</label>
-                <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-lock"></i></span>
-                    <input type="password" id="password" name="password"
-                           class="form-control @error('password') is-invalid @enderror"
-                           placeholder="••••••••"
-                           required autocomplete="current-password">
-                </div>
-            </div>
-
-            {{-- Remember me --}}
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="remember" name="remember">
-                    <label class="form-check-label" for="remember" style="font-size:13px;color:#6b7280;">
-                        Ingat saya
-                    </label>
-                </div>
-
-                @if(Route::has('password.request'))
-                    <a href="{{ route('password.request') }}" class="forgot-link">
-                        Lupa password?
-                    </a>
-                @endif
-            </div>
-
-            {{-- Submit --}}
-            <button type="submit" class="btn btn-login">
-                <i class="bi bi-box-arrow-in-right me-2"></i>
-                Masuk ke Sistem
-            </button>
-
-        </form>
-
-        <p class="text-center text-muted mt-4 mb-0" style="font-size:12px;">
-            &copy; {{ date('Y') }} HRM System &middot; Internal Use Only
-        </p>
-    </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>
