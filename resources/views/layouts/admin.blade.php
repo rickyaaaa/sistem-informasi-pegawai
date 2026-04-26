@@ -19,8 +19,8 @@
         /* ── Base ── */
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f0f2f5;
-            color: #212529;
+            background-color: #111827;
+            color: #e5e7eb;
         }
 
         /* ── Sidebar ── */
@@ -174,8 +174,8 @@
 
         /* ── Topbar ── */
         .topbar {
-            background: #fff;
-            border-bottom: 1px solid #e5e7eb;
+            background: #1f2937;
+            border-bottom: 1px solid #374151;
             height: 64px;
             display: flex;
             align-items: center;
@@ -184,14 +184,14 @@
             position: sticky;
             top: 0;
             z-index: 1030;
-            box-shadow: 0 1px 3px rgba(0,0,0,.04);
+            box-shadow: 0 1px 3px rgba(0,0,0,.3);
         }
 
         .topbar .page-title {
             font-size: 17px;
             font-weight: 700;
             margin: 0;
-            color: #111827;
+            color: #f3f4f6;
             text-transform: uppercase;
         }
 
@@ -229,9 +229,9 @@
             gap: 6px;
             font-size: 13px;
             font-weight: 500;
-            color: #6b7280;
-            background: #f9fafb;
-            border: 1px solid #e5e7eb;
+            color: #d1d5db;
+            background: #374151;
+            border: 1px solid #4b5563;
             border-radius: 8px;
             padding: 7px 14px;
             cursor: pointer;
@@ -240,9 +240,9 @@
         }
 
         .btn-logout:hover {
-            background: #fee2e2;
-            color: #dc2626;
-            border-color: #fca5a5;
+            background: #7f1d1d;
+            color: #fff;
+            border-color: #991b1b;
         }
 
         /* ── Page content ── */
@@ -253,9 +253,11 @@
 
         /* ── Card overrides ── */
         .card {
-            border: none;
-            box-shadow: 0 1px 4px rgba(0,0,0,.07);
+            border: 1px solid #374151;
+            box-shadow: 0 4px 6px rgba(0,0,0,.3);
             border-radius: 12px;
+            background-color: #1f2937;
+            color: #e5e7eb;
         }
 
         .card-header {
@@ -312,8 +314,41 @@
         }
 
         /* ── Tables ── */
+        .table {
+            --bs-table-bg: transparent;
+            --bs-table-color: #e5e7eb;
+            --bs-table-border-color: #374151;
+            --bs-table-striped-color: #e5e7eb;
+            --bs-table-striped-bg: rgba(255, 255, 255, 0.02);
+            --bs-table-hover-color: #fff;
+            --bs-table-hover-bg: rgba(255, 255, 255, 0.05);
+        }
+        
         .table > :not(caption) > * > * {
             padding: .75rem 1rem;
+        }
+
+        .table-light {
+            --bs-table-bg: #374151;
+            --bs-table-color: #e5e7eb;
+            --bs-table-border-color: #4b5563;
+            --bs-table-striped-bg: rgba(255, 255, 255, 0.05);
+        }
+
+        /* ── Form Inputs ── */
+        .form-control, .form-select, .input-group-text {
+            background-color: #374151;
+            border-color: #4b5563;
+            color: #e5e7eb;
+        }
+        .form-control:focus, .form-select:focus {
+            background-color: #4b5563;
+            border-color: #dc2626;
+            color: #fff;
+            box-shadow: 0 0 0 0.25rem rgba(220, 38, 38, 0.25);
+        }
+        .form-control::placeholder {
+            color: #9ca3af;
         }
 
         /* ── Pagination ── */
@@ -324,6 +359,33 @@
             --bs-pagination-hover-color: #991b1b;
             --bs-pagination-focus-color: #dc2626;
             --bs-pagination-focus-box-shadow: 0 0 0 0.25rem rgba(220, 38, 38, 0.25);
+            --bs-pagination-bg: #1f2937;
+            --bs-pagination-border-color: #374151;
+            --bs-pagination-hover-bg: #374151;
+            --bs-pagination-hover-border-color: #4b5563;
+        }
+
+        /* ── Modals & Dropdowns ── */
+        .modal-content, .dropdown-menu {
+            background-color: #1f2937;
+            color: #e5e7eb;
+            border: 1px solid #374151;
+        }
+        .modal-header {
+            border-bottom: 1px solid #374151;
+        }
+        .modal-footer {
+            border-top: 1px solid #374151;
+        }
+        .btn-close {
+            filter: invert(1) grayscale(100%) brightness(200%);
+        }
+        .dropdown-item {
+            color: #e5e7eb;
+        }
+        .dropdown-item:hover, .dropdown-item:focus {
+            background-color: #374151;
+            color: #fff;
         }
     </style>
 

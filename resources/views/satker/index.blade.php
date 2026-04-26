@@ -101,9 +101,9 @@
                                             <span class="badge bg-info text-dark">Satker</span>
                                         @endif
                                     </td>
-                                    <td class="text-end">
+                                    <td class="text-end" style="white-space:nowrap;">
                                         <a href="{{ route('satker.edit', $satker) }}"
-                                           class="btn btn-outline-secondary btn-sm">
+                                           class="text-success mx-1" title="Edit">
                                             <i class="bi bi-pencil-square"></i>
                                         </a>
                                         <form action="{{ route('satker.destroy', $satker) }}"
@@ -111,7 +111,7 @@
                                               onsubmit="return confirm('Hapus {{ $satker->nama_satker }} beserta semua sub-unit-nya?')">
                                             @csrf
                                             @method('DELETE')
-                                            <button class="btn btn-outline-danger btn-sm">
+                                            <button type="submit" class="text-danger mx-1 border-0 bg-transparent" title="Hapus">
                                                 <i class="bi bi-trash3"></i>
                                             </button>
                                         </form>

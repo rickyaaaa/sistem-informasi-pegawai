@@ -15,7 +15,7 @@
 <div class="mb-4">
     <div class="btn-group" role="group">
         <a href="{{ route('approval.index') }}"
-           class="btn btn-sm {{ !request('status') ? 'btn-dark' : 'btn-outline-secondary' }}">
+           class="btn btn-sm {{ !request('status') ? 'btn-secondary text-white' : 'btn-outline-secondary' }}">
             Semua
         </a>
         <a href="{{ route('approval.index', ['status' => 'pending']) }}"

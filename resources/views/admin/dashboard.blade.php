@@ -188,36 +188,39 @@
     /* ── Tabs ── */
     .result-tabs .nav-link {
         font-weight: 700;
-        color: #4b5563;
-        background: #fff;
-        border: 1px solid #e5e7eb;
+        color: #9ca3af;
+        background: #1f2937;
+        border: 1px solid #374151;
         padding: 10px 24px;
         margin-left: 8px;
         border-radius: 8px 8px 0 0;
     }
     .result-tabs .nav-link.active {
-        color: #111827;
-        border-bottom-color: #fff;
+        color: #f3f4f6;
+        background: #374151;
+        border-bottom-color: #374151;
     }
     .tab-content-box {
-        background: #fff;
-        border: 1px solid #e5e7eb;
+        background: #374151;
+        border: 1px solid #4b5563;
         border-radius: 12px;
         border-top-right-radius: 0;
         padding: 24px;
-        box-shadow: 0 4px 12px rgba(0,0,0,.03);
+        box-shadow: 0 4px 12px rgba(0,0,0,.3);
+        color: #e5e7eb;
     }
     
     /* ── Card Pegawai ── */
     .pegawai-card {
-        background: #fff;
-        border: 1px solid #e5e7eb;
+        background: #1f2937;
+        border: 1px solid #374151;
         border-radius: 12px;
         padding: 16px;
         display: flex;
         align-items: center;
         margin-bottom: 12px;
-        box-shadow: 0 2px 4px rgba(0,0,0,.04);
+        box-shadow: 0 2px 4px rgba(0,0,0,.3);
+        color: #e5e7eb;
     }
     .pegawai-card .foto-wrapper {
         width: 65px;
