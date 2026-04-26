@@ -9,7 +9,7 @@
         <h5 class="fw-bold mb-0">Daftar Program Studi</h5>
         <small class="text-muted">Total {{ $prodis->total() }} program studi terdaftar</small>
     </div>
-    <a href="{{ route('prodi.create') }}" class="btn btn-primary btn-sm">
+    <a href="{{ route('prodi.create') }}" class="btn btn-danger btn-sm">
         <i class="bi bi-plus-lg me-1"></i> Tambah Program Studi
     </a>
 </div>
@@ -31,7 +31,7 @@
             </select>
         </div>
         <div class="col-md-2 d-flex gap-1">
-            <button type="submit" class="btn btn-sm btn-primary flex-grow-1">
+            <button type="submit" class="btn btn-sm btn-danger flex-grow-1">
                 <i class="bi bi-search"></i>
             </button>
             @if(request()->hasAny(['q','kategori']))
@@ -66,7 +66,7 @@
                             <td class="fw-medium">{{ $prodi->nama }}</td>
                             <td>
                                 @if($prodi->kategori === 'Perguruan Tinggi')
-                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle">Perguruan Tinggi</span>
+                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle">Perguruan Tinggi</span>
                                 @elseif($prodi->kategori === 'SMA/SMK')
                                     <span class="badge bg-info-subtle text-info border border-info-subtle">SMA/SMK</span>
                                 @else

@@ -22,7 +22,7 @@
                          alt="Foto {{ $pegawai->nama }}"
                          style="width:130px;height:130px;border-radius:50%;object-fit:cover;border:4px solid #e5e7eb;margin-bottom:16px;">
                 @else
-                    <div style="width:130px;height:130px;border-radius:50%;background:linear-gradient(135deg,#3b82f6,#6366f1);display:inline-flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:48px;margin-bottom:16px;border:4px solid #e5e7eb;">
+                    <div style="width:130px;height:130px;border-radius:50%;background:linear-gradient(135deg,#dc2626,#991b1b);display:inline-flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:48px;margin-bottom:16px;border:4px solid #e5e7eb;">
                         {{ strtoupper(substr($pegawai->nama, 0, 1)) }}
                     </div>
                 @endif
@@ -67,7 +67,7 @@
         {{-- Actions Card --}}
         <div class="card shadow-sm border-0 mt-3">
             <div class="card-body">
-                <a href="{{ route('pegawai.edit', $pegawai) }}" class="btn btn-primary btn-sm w-100 mb-2">
+                <a href="{{ route('pegawai.edit', $pegawai) }}" class="btn btn-danger btn-sm w-100 mb-2">
                     <i class="bi bi-pencil-square me-1"></i> Edit Pegawai
                 </a>
                 <form action="{{ route('pegawai.destroy', $pegawai) }}" method="POST"
@@ -91,7 +91,7 @@
         <div class="card shadow-sm border-0 mb-3">
             <div class="card-header bg-white py-3">
                 <h6 class="fw-semibold mb-0">
-                    <i class="bi bi-person-lines-fill me-2 text-primary"></i> Informasi Pribadi
+                    <i class="bi bi-person-lines-fill me-2 text-danger"></i> Informasi Pribadi
                 </h6>
             </div>
             <div class="card-body">
@@ -120,7 +120,7 @@
         <div class="card shadow-sm border-0 mb-3">
             <div class="card-header bg-white py-3">
                 <h6 class="fw-semibold mb-0">
-                    <i class="bi bi-building me-2 text-primary"></i> Informasi Kepegawaian
+                    <i class="bi bi-building me-2 text-danger"></i> Informasi Kepegawaian
                 </h6>
             </div>
             <div class="card-body">
@@ -158,7 +158,7 @@
         <div class="card shadow-sm border-0">
             <div class="card-header bg-white py-3">
                 <h6 class="fw-semibold mb-0">
-                    <i class="bi bi-folder2-open me-2 text-primary"></i> Dokumen
+                    <i class="bi bi-folder2-open me-2 text-danger"></i> Dokumen
                 </h6>
             </div>
             <div class="card-body">
@@ -166,17 +166,17 @@
                     {{-- KTP --}}
                     <div class="col-sm-6">
                         <div class="d-flex align-items-center gap-3 p-3 rounded-3" style="background:#f8fafc;border:1px solid #e5e7eb;">
-                            <div style="width:42px;height:42px;border-radius:10px;background:#eff6ff;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                                <i class="bi bi-file-earmark-person text-primary" style="font-size:20px;"></i>
+                            <div style="width:42px;height:42px;border-radius:10px;background:#fef2f2;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                <i class="bi bi-file-earmark-person text-danger" style="font-size:20px;"></i>
                             </div>
                             <div class="flex-grow-1">
                                 <div class="fw-medium" style="font-size:14px;">KTP</div>
                                 @if($pegawai->file_ktp)
-                                    <a href="{{ route('pegawai.file.show', [$pegawai, 'ktp']) }}" target="_blank" class="text-primary small text-decoration-none">
+                                    <a href="{{ route('pegawai.file.show', [$pegawai, 'ktp']) }}" target="_blank" class="text-danger small text-decoration-none">
                                         <i class="bi bi-eye me-1"></i> Lihat
                                     </a>
                                     <span class="mx-1 text-muted">|</span>
-                                    <a href="{{ route('pegawai.file.download', [$pegawai, 'ktp']) }}" class="text-primary small text-decoration-none">
+                                    <a href="{{ route('pegawai.file.download', [$pegawai, 'ktp']) }}" class="text-danger small text-decoration-none">
                                         <i class="bi bi-download me-1"></i> Unduh
                                     </a>
                                 @else
@@ -195,11 +195,11 @@
                             <div class="flex-grow-1">
                                 <div class="fw-medium" style="font-size:14px;">Kartu Keluarga</div>
                                 @if($pegawai->file_kk)
-                                    <a href="{{ route('pegawai.file.show', [$pegawai, 'kk']) }}" target="_blank" class="text-primary small text-decoration-none">
+                                    <a href="{{ route('pegawai.file.show', [$pegawai, 'kk']) }}" target="_blank" class="text-danger small text-decoration-none">
                                         <i class="bi bi-eye me-1"></i> Lihat
                                     </a>
                                     <span class="mx-1 text-muted">|</span>
-                                    <a href="{{ route('pegawai.file.download', [$pegawai, 'kk']) }}" class="text-primary small text-decoration-none">
+                                    <a href="{{ route('pegawai.file.download', [$pegawai, 'kk']) }}" class="text-danger small text-decoration-none">
                                         <i class="bi bi-download me-1"></i> Unduh
                                     </a>
                                 @else
@@ -217,11 +217,11 @@
                             <div class="flex-grow-1">
                                 <div class="fw-medium" style="font-size:14px;">Ijazah</div>
                                 @if($pegawai->file_ijazah)
-                                    <a href="{{ route('pegawai.file.show', [$pegawai, 'ijazah']) }}" target="_blank" class="text-primary small text-decoration-none">
+                                    <a href="{{ route('pegawai.file.show', [$pegawai, 'ijazah']) }}" target="_blank" class="text-danger small text-decoration-none">
                                         <i class="bi bi-eye me-1"></i> Lihat
                                     </a>
                                     <span class="mx-1 text-muted">|</span>
-                                    <a href="{{ route('pegawai.file.download', [$pegawai, 'ijazah']) }}" class="text-primary small text-decoration-none">
+                                    <a href="{{ route('pegawai.file.download', [$pegawai, 'ijazah']) }}" class="text-danger small text-decoration-none">
                                         <i class="bi bi-download me-1"></i> Unduh
                                     </a>
                                 @else

@@ -84,7 +84,7 @@
                             {{-- Action Type --}}
                             <td>
                                 @if($req->action_type === 'create')
-                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2">
+                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2">
                                         <i class="bi bi-plus-circle me-1"></i>Tambah
                                     </span>
                                 @elseif($req->action_type === 'update')
@@ -179,17 +179,17 @@
                                     @endphp
                                     &middot; KTP: <a target="_blank"
                                         href="{{ $ktpPegawai ? route('pegawai.file.show', [$ktpPegawai, 'ktp']) : asset('storage/' . $req->data_payload['file_ktp']) }}"
-                                        class="text-primary">Lihat</a>
+                                        class="text-danger">Lihat</a>
                                 @endif
                                 @if(!empty($req->data_payload['file_kk']))
                                     &middot; KK: <a target="_blank"
                                         href="{{ $ktpPegawai ?? ($req->pegawai) ? route('pegawai.file.show', [$req->pegawai ?? $ktpPegawai, 'kk']) : asset('storage/' . $req->data_payload['file_kk']) }}"
-                                        class="text-primary">Lihat</a>
+                                        class="text-danger">Lihat</a>
                                 @endif
                                 @if(!empty($req->data_payload['file_ijazah']))
                                     &middot; Ijazah: <a target="_blank"
                                         href="{{ $req->pegawai ? route('pegawai.file.show', [$req->pegawai, 'ijazah']) : asset('storage/' . $req->data_payload['file_ijazah']) }}"
-                                        class="text-primary">Lihat Ijazah</a>
+                                        class="text-danger">Lihat Ijazah</a>
                                 @endif
                             </td>
                         </tr>

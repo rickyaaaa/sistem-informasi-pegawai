@@ -315,6 +315,16 @@
         .table > :not(caption) > * > * {
             padding: .75rem 1rem;
         }
+
+        /* ── Pagination ── */
+        .pagination {
+            --bs-pagination-color: #dc2626;
+            --bs-pagination-active-bg: #dc2626;
+            --bs-pagination-active-border-color: #dc2626;
+            --bs-pagination-hover-color: #991b1b;
+            --bs-pagination-focus-color: #dc2626;
+            --bs-pagination-focus-box-shadow: 0 0 0 0.25rem rgba(220, 38, 38, 0.25);
+        }
     </style>
 
     @stack('styles')

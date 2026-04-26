@@ -416,7 +416,7 @@
     {{-- Info Hasil Pencarian (Jumlah & Filter Aktif) --}}
     <div class="d-flex justify-content-between align-items-end mb-2">
         <div>
-            <span class="badge bg-primary rounded-pill mb-2 px-3 py-2">
+            <span class="badge bg-danger rounded-pill mb-2 px-3 py-2">
                 {{ $searchResults->total() }} Data Ditemukan
             </span>
             <div class="d-flex flex-wrap gap-2 align-items-center">
@@ -482,7 +482,7 @@
                                     </div>
                                 </div>
                                 <div class="actions">
-                                    <a href="{{ route('pegawai.show', $p) }}" class="btn btn-primary text-white" title="Lihat">
+                                    <a href="{{ route('pegawai.show', $p) }}" class="btn btn-danger text-white" title="Lihat">
                                         <i class="bi bi-eye"></i>
                                     </a>
                                     <a href="{{ route('pegawai.edit', $p) }}" class="btn btn-success text-white" title="Edit">
@@ -552,7 +552,7 @@
                                     {{ $p->satker?->level === 'sub' ? strtoupper($p->satker?->nama_satker) : '-' }}
                                 </td>
                                 <td class="text-center">
-                                    <a href="{{ route('pegawai.show', $p) }}" class="text-primary me-2"><i class="bi bi-eye"></i></a>
+                                    <a href="{{ route('pegawai.show', $p) }}" class="text-danger me-2"><i class="bi bi-eye"></i></a>
                                     <a href="{{ route('pegawai.edit', $p) }}" class="text-success"><i class="bi bi-pencil-square"></i></a>
                                 </td>
                             </tr>
@@ -607,7 +607,7 @@
                             <span class="fw-black" style="font-size:32px; letter-spacing:-1px;">{{ number_format($totalPegawai) }}</span>
                         </div>
                         <div class="d-flex gap-3 text-white-50" style="font-size:14px; margin-left: 20px;">
-                            <span><i class="bi bi-gender-male text-primary me-1"></i> Pria: <strong class="text-white">{{ number_format($pegawaiPria) }}</strong></span>
+                            <span><i class="bi bi-gender-male text-danger me-1"></i> Pria: <strong class="text-white">{{ number_format($pegawaiPria) }}</strong></span>
                             <span><i class="bi bi-gender-female text-danger me-1"></i> Wanita: <strong class="text-white">{{ number_format($pegawaiWanita) }}</strong></span>
                         </div>
                     </div>

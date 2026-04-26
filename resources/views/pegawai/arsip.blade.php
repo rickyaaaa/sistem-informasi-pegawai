@@ -33,7 +33,7 @@
                    placeholder="Cari nama atau NIK...">
         </div>
         <div class="col-md-3 d-flex gap-1">
-            <button type="submit" class="btn btn-sm btn-primary flex-grow-1">
+            <button type="submit" class="btn btn-sm btn-danger flex-grow-1">
                 <i class="bi bi-search me-1"></i> Cari
             </button>
             @if(request()->filled('q'))

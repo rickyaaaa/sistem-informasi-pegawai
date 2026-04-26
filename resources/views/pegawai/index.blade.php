@@ -16,7 +16,7 @@
         <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#importModal">
             <i class="bi bi-file-earmark-arrow-up me-1"></i> Import Excel
         </button>
-        <a href="{{ route('pegawai.create') }}" class="btn btn-primary btn-sm">
+        <a href="{{ route('pegawai.create') }}" class="btn btn-danger btn-sm">
             <i class="bi bi-plus-lg me-1"></i> Tambah Pegawai
         </a>
     </div>
@@ -63,10 +63,10 @@
 {{-- Info banner for admin_satker --}}
 @if(auth()->user()->isAdminSatker())
     <div class="alert border-0 mb-4 d-flex align-items-start gap-3"
-         style="background:#eff6ff;border-left:4px solid #3b82f6 !important;border-radius:10px;padding:14px 18px;">
-        <i class="bi bi-info-circle-fill text-primary mt-1" style="font-size:18px;flex-shrink:0;"></i>
+         style="background:#fef2f2;border-left:4px solid #dc2626 !important;border-radius:10px;padding:14px 18px;">
+        <i class="bi bi-info-circle-fill text-danger mt-1" style="font-size:18px;flex-shrink:0;"></i>
         <div>
-            <div class="fw-semibold text-primary mb-1" style="font-size:14px;">Mode Pengajuan Aktif</div>
+            <div class="fw-semibold text-danger mb-1" style="font-size:14px;">Mode Pengajuan Aktif</div>
             <div class="text-secondary" style="font-size:13px;">
                 Setiap tindakan <strong>tambah, ubah, atau hapus</strong> pegawai akan dikirim sebagai permintaan
                 dan memerlukan persetujuan <strong>ADMIN POLDA</strong> sebelum diterapkan ke sistem.
@@ -95,7 +95,7 @@
             </select>
         </div>
         <div class="col-md-3 d-flex gap-1">
-            <button type="submit" class="btn btn-sm btn-primary flex-grow-1">
+            <button type="submit" class="btn btn-sm btn-danger flex-grow-1">
                 <i class="bi bi-search me-1"></i> Filter
             </button>
             @if(request()->filled('q') || request()->filled('satker_id'))
@@ -159,7 +159,7 @@
 
                             <td class="text-end" style="white-space:nowrap;">
                                 <a href="{{ route('pegawai.show', $pegawai) }}"
-                                   class="text-primary mx-1" title="Lihat Detail">
+                                   class="text-danger mx-1" title="Lihat Detail">
                                     <i class="bi bi-eye"></i>
                                 </a>
                                 <a href="{{ route('pegawai.edit', $pegawai) }}"

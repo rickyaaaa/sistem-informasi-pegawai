@@ -11,7 +11,7 @@
             <small class="text-muted">Total {{ $satkers->total() }} Satker/Satwil terdaftar</small>
         </div>
         <div class="d-flex gap-2">
-            <a href="{{ route('satker.create') }}" class="btn btn-primary btn-sm">
+            <a href="{{ route('satker.create') }}" class="btn btn-danger btn-sm">
                 <i class="bi bi-plus-lg me-1"></i> Tambah Satker/Satwil
             </a>
         </div>
@@ -33,7 +33,7 @@
                 </select>
             </div>
             <div class="col-md-2 d-flex gap-1">
-                <button type="submit" class="btn btn-sm btn-primary flex-grow-1">
+                <button type="submit" class="btn btn-sm btn-danger flex-grow-1">
                     <i class="bi bi-search"></i>
                 </button>
                 @if(request()->hasAny(['q','tipe']))
@@ -87,7 +87,7 @@
                                         {{ ($satkers->currentPage() - 1) * $satkers->perPage() + $loop->iteration }}
                                     </td>
                                     <td>
-                                        <span class="fw-bold text-primary">{{ $satker->nama_satker }}</span>
+                                        <span class="fw-bold text-danger">{{ $satker->nama_satker }}</span>
                                         @if($satker->children->count() > 0)
                                             <span class="badge bg-light text-secondary border ms-1" style="font-size:.7rem;">
                                                 {{ $satker->children->count() }} sub
@@ -220,7 +220,7 @@
                             <i class="bi bi-check-circle-fill text-success fs-1 d-block mb-3"></i>
                             <h5 class="fw-bold">Import Selesai!</h5>
                             <p class="text-muted" id="ai-summary-text"></p>
-                            <button type="button" class="btn btn-primary" onclick="window.location.reload()">
+                            <button type="button" class="btn btn-danger" onclick="window.location.reload()">
                                 <i class="bi bi-arrow-clockwise me-1"></i> Refresh Halaman
                             </button>
                         </div>

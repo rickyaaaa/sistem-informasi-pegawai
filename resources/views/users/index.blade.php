@@ -9,7 +9,7 @@
         <h5 class="fw-bold mb-0">Daftar Operator</h5>
         <small class="text-muted">Total {{ $users->total() }} operator terdaftar</small>
     </div>
-    <a href="{{ route('users.create') }}" class="btn btn-primary btn-sm">
+    <a href="{{ route('users.create') }}" class="btn btn-danger btn-sm">
         <i class="bi bi-person-plus-fill me-1"></i> Tambah User
     </a>
 </div>
@@ -37,7 +37,7 @@
             </select>
         </div>
         <div class="col-md-2 d-flex gap-1">
-            <button type="submit" class="btn btn-sm btn-primary flex-grow-1">
+            <button type="submit" class="btn btn-sm btn-danger flex-grow-1">
                 <i class="bi bi-search"></i>
             </button>
             @if(request()->hasAny(['q','role','status']))
@@ -95,7 +95,7 @@
                             <td>
                                 <div class="d-flex align-items-center gap-2">
                                     <div class="avatar-sm"
-                                         style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#3b82f6,#6366f1);
+                                         style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#dc2626,#991b1b);
                                                 color:#fff;display:flex;align-items:center;justify-content:center;
                                                 font-size:13px;font-weight:700;flex-shrink:0;">
                                         {{ strtoupper(substr($user->name, 0, 1)) }}

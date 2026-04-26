@@ -9,7 +9,7 @@
 
             {{-- Form Edit Induk --}}
             <div class="card border-0 shadow-sm mb-4">
-                <div class="card-header bg-primary text-white d-flex align-items-center gap-2">
+                <div class="card-header bg-danger text-white d-flex align-items-center gap-2">
                     <i class="bi bi-pencil-square"></i>
                     <h5 class="mb-0">Form Edit Satker/Satwil</h5>
                 </div>
@@ -70,7 +70,7 @@
                             <a href="{{ route('satker.index') }}" class="btn btn-outline-secondary">
                                 <i class="bi bi-arrow-left me-1"></i> Kembali
                             </a>
-                            <button type="submit" class="btn btn-primary px-4">
+                            <button type="submit" class="btn btn-danger px-4">
                                 <i class="bi bi-save me-1"></i> Update
                             </button>
                         </div>
@@ -83,7 +83,7 @@
                 <div class="card border-0 shadow-sm">
                     <div class="card-header bg-white d-flex justify-content-between align-items-center">
                         <div class="d-flex align-items-center gap-2">
-                            <i class="bi bi-diagram-3 text-primary"></i>
+                            <i class="bi bi-diagram-3 text-danger"></i>
                             <h6 class="mb-0 fw-bold">Sub-Unit Terdaftar</h6>
                             <span class="badge bg-secondary ms-1">{{ $satker->children->count() }}</span>
                         </div>

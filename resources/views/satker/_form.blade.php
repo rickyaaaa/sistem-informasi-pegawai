@@ -28,7 +28,7 @@
 </div>
 
 <div class="mt-4 d-flex gap-2">
-    <button type="submit" class="btn btn-primary">
+    <button type="submit" class="btn btn-danger">
         Simpan
     </button>
 

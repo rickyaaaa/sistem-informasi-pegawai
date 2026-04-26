@@ -22,7 +22,7 @@
         @endif
 
         <div class="card shadow-sm border-0">
-            <div class="card-header bg-primary text-white d-flex align-items-center gap-2">
+            <div class="card-header bg-danger text-white d-flex align-items-center gap-2">
                 <i class="bi bi-pencil-square"></i>
                 Edit Data Pegawai
             </div>
@@ -45,7 +45,7 @@
                                 <i class="bi bi-send me-1"></i> Kirim untuk Persetujuan
                             </button>
                         @else
-                            <button type="submit" class="btn btn-primary px-4">
+                            <button type="submit" class="btn btn-danger px-4">
                                 <i class="bi bi-save me-1"></i> Update
                             </button>
                         @endif

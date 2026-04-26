@@ -218,7 +218,7 @@
 </div>
 
 <div class="mt-4 d-flex gap-2">
-    <button type="submit" class="btn btn-primary">Simpan</button>
+    <button type="submit" class="btn btn-danger">Simpan</button>
     <a href="{{ route('pegawai.index') }}" class="btn btn-outline-secondary">Kembali</a>
 </div>
 

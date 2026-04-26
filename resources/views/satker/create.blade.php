@@ -8,7 +8,7 @@
     <div class="col-md-10 col-lg-8">
 
         <div class="card border-0 shadow-sm">
-            <div class="card-header bg-primary text-white d-flex align-items-center gap-2">
+            <div class="card-header bg-danger text-white d-flex align-items-center gap-2">
                 <i class="bi bi-building-fill-add"></i>
                 <h5 class="mb-0">Form Tambah Satker/Satwil</h5>
             </div>
@@ -110,7 +110,7 @@
                                 <i class="bi bi-arrow-left me-1"></i> Kembali
                             </a>
                         @endif
-                        <button type="submit" class="btn btn-primary px-4">
+                        <button type="submit" class="btn btn-danger px-4">
                             <i class="bi bi-save me-1"></i> Simpan
                         </button>
                     </div>

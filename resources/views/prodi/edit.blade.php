@@ -7,7 +7,7 @@
 <div class="row justify-content-center">
     <div class="col-lg-6">
         <div class="card shadow-sm border-0">
-            <div class="card-header bg-primary text-white d-flex align-items-center gap-2">
+            <div class="card-header bg-danger text-white d-flex align-items-center gap-2">
                 <i class="bi bi-pencil-square"></i>
                 <span>Edit Program Studi: {{ $prodi->nama }}</span>
             </div>
@@ -39,7 +39,7 @@
                         <a href="{{ route('prodi.index') }}" class="btn btn-outline-secondary">
                             <i class="bi bi-arrow-left me-1"></i> Kembali
                         </a>
-                        <button type="submit" class="btn btn-primary px-4">
+                        <button type="submit" class="btn btn-danger px-4">
                             <i class="bi bi-save me-1"></i> Update
                         </button>
                     </div>
