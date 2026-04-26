@@ -28,7 +28,7 @@
 
         .login-card {
             width: 100%;
-            max-width: 300px;
+            max-width: 340px;
             margin-top: 18vh; /* Pushed down to reveal center logo */
             border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 16px;
