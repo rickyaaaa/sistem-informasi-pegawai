@@ -19,7 +19,7 @@
         body {
             font-family: 'Inter', sans-serif;
             background: linear-gradient(rgba(30, 42, 59, 0.6), rgba(45, 63, 87, 0.6)), url('{{ asset('img/sipnona.png') }}') no-repeat center center fixed;
-            background-size: cover;
+            background-size: 100% 100%;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -29,6 +29,7 @@
         .login-card {
             width: 100%;
             max-width: 300px;
+            margin-top: 18vh; /* Pushed down to reveal center logo */
             border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 16px;
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
@@ -40,90 +41,87 @@
 
         .login-header {
             background: linear-gradient(135deg, rgba(31, 41, 55, 0.55), rgba(153, 27, 27, 0.65));
-            padding: 24px 20px 16px;
-            text-align: center;
+            padding: 14px 16px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .login-header .brand-icon {
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 15px;
-            margin: 0 auto 12px;
+            justify-content: space-between;
         }
 
-        .login-header .brand-icon img {
-            width: 58px;
-            height: 58px;
+        .login-header img {
+            width: 42px;
+            height: 42px;
             object-fit: contain;
             filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
         }
 
+        .login-header .header-text {
+            text-align: center;
+        }
+
         .login-header h1 {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 700;
             color: #fff;
             margin: 0;
+            letter-spacing: 0.5px;
         }
 
         .login-header p {
-            font-size: 11px;
+            font-size: 9px;
             color: rgba(255, 255, 255, .8);
-            margin: 4px 0 0;
+            margin: 2px 0 0;
         }
 
         .login-body {
             background: rgba(255, 255, 255, 0.65);
-            padding: 24px;
+            padding: 16px 20px 12px;
         }
 
-        .form-label {
-            font-size: 13px;
-            font-weight: 600;
-            color: #374151;
-            margin-bottom: 6px;
-        }
-
-        .form-control {
+        .input-group-custom {
+            display: flex;
+            border: 1px solid rgba(209, 213, 219, 0.7);
             border-radius: 8px;
-            border-color: rgba(209, 213, 219, 0.7);
+            overflow: hidden;
             background: rgba(255, 255, 255, 0.85);
-            font-size: 14px;
-            padding: 10px 14px;
             transition: border-color .2s, box-shadow .2s;
         }
 
-        .form-control:focus {
+        .input-group-custom:focus-within {
             border-color: #dc2626;
             box-shadow: 0 0 0 3px rgba(220, 38, 38, .15);
         }
 
-        .input-group-text {
-            background: rgba(249, 250, 251, 0.7);
-            border-radius: 8px 0 0 8px !important;
-            border-color: rgba(209, 213, 219, 0.7);
-            color: #6b7280;
-        }
-
-        .input-group .form-control {
-            border-radius: 0 !important;
-        }
-
-        .input-group .form-control.rounded-end-custom {
-            border-radius: 0 8px 8px 0 !important;
-        }
-
-        .input-group .btn-toggle-pass {
-            border-radius: 0 8px 8px 0 !important;
-            border-color: rgba(209, 213, 219, 0.7);
-            background: rgba(249, 250, 251, 0.7);
-            color: #6b7280;
-            border-left: none;
+        .input-group-custom .form-control {
+            border: none;
+            background: transparent;
+            box-shadow: none;
+            padding: 10px 14px;
+            font-size: 14px;
+            color: #4b5563;
+            border-radius: 0;
         }
         
-        .input-group .btn-toggle-pass:hover {
-            background: #e5e7eb;
+        .input-group-custom .form-control:focus {
+            box-shadow: none;
+            background: transparent;
+        }
+
+        .input-group-custom .input-group-text,
+        .input-group-custom .btn {
+            border: none;
+            border-left: 1px solid rgba(209, 213, 219, 0.7);
+            background: rgba(249, 250, 251, 0.7);
+            color: #6b7280;
+            border-radius: 0;
+            padding: 0 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .input-group-custom .btn:hover {
+            background: rgba(229, 231, 235, 0.8);
             color: #374151;
         }
 
@@ -196,12 +194,12 @@
 
         {{-- Header --}}
         <div class="login-header">
-            <div class="brand-icon">
-                <img src="{{ asset('img/polda.png') }}" alt="Logo Polda Lampung">
-                <img src="{{ asset('img/sdm.png') }}" alt="Logo SDM Polri">
+            <img src="{{ asset('img/polda.png') }}" alt="Logo Polda Lampung">
+            <div class="header-text">
+                <h1>SIPNONA</h1>
+                <p>SISTEM INFORMASI PEGAWAI NON ASN</p>
             </div>
-            <h1>SIPNONA</h1>
-            <p>SISTEM INFORMASI PEGAWAI NON ASN</p>
+            <img src="{{ asset('img/sdm.png') }}" alt="Logo SDM Polri">
         </div>
 
         {{-- Body --}}
@@ -227,52 +225,33 @@
                 @csrf
 
                 {{-- Username --}}
-                <div class="mb-3">
-                    <label for="username" class="form-label">Username</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-person"></i></span>
+                <div class="mb-2">
+                    <div class="input-group-custom">
                         <input type="text" id="username" name="username"
-                            class="form-control rounded-end-custom @error('username') is-invalid @enderror" value="{{ old('username') }}"
-                            placeholder="Masukkan username" required autofocus autocomplete="username">
+                            class="form-control @error('username') is-invalid @enderror" value="{{ old('username') }}"
+                            placeholder="Username" required autofocus autocomplete="username">
+                        <span class="input-group-text"><i class="bi bi-person-fill"></i></span>
                     </div>
                 </div>
 
                 {{-- Password --}}
-                <div class="mb-3">
-                    <label for="password" class="form-label">Password</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                <div class="mb-2">
+                    <div class="input-group-custom">
                         <input type="password" id="password" name="password"
-                            class="form-control @error('password') is-invalid @enderror" placeholder="••••••••" required
-                            autocomplete="current-password" style="border-right: none;">
-                        <button class="btn btn-toggle-pass" type="button" id="togglePassword">
-                            <i class="bi bi-eye-slash" id="toggleIcon"></i>
+                            class="form-control @error('password') is-invalid @enderror" placeholder="Password" required
+                            autocomplete="current-password">
+                        <button class="btn" type="button" id="togglePassword">
+                            <i class="bi bi-eye-slash-fill" id="toggleIcon"></i>
                         </button>
                     </div>
                 </div>
 
-                {{-- Remember me --}}
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="remember" name="remember">
-                        <label class="form-check-label" for="remember" style="font-size:13px;color:#6b7280;">
-                            Ingat saya
-                        </label>
-                    </div>
-
-                    @if(Route::has('password.request'))
-                        <a href="{{ route('password.request') }}" class="forgot-link">
-                            Lupa password?
-                        </a>
-                    @endif
-                </div>
-
                 {{-- Submit --}}
-                <button type="submit" class="btn btn-login">
-                    <i class="bi bi-box-arrow-in-right me-2"></i>
-                    Masuk ke Sistem
-                </button>
-
+                <div class="mt-4 mb-2">
+                    <button type="submit" class="btn btn-login">
+                        Masuk
+                    </button>
+                </div>
             </form>
 
             <p class="text-center text-muted mt-4 mb-0" style="font-size:12px;">
