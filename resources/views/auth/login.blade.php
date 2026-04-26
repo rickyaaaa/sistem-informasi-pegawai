@@ -28,50 +28,54 @@
 
         .login-card {
             width: 100%;
-            max-width: 420px;
-            border: none;
+            max-width: 350px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 16px;
-            box-shadow: 0 25px 60px rgba(0, 0, 0, .4);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
             overflow: hidden;
+            background: transparent;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
         }
 
         .login-header {
-            background: linear-gradient(135deg, #3b82f6, #6366f1);
-            padding: 36px 32px 28px;
+            background: linear-gradient(135deg, rgba(31, 41, 55, 0.55), rgba(153, 27, 27, 0.65));
+            padding: 24px 20px 16px;
             text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .login-header .brand-icon {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 16px;
             display: flex;
             align-items: center;
             justify-content: center;
+            gap: 15px;
+            margin: 0 auto 12px;
         }
 
         .login-header .brand-icon img {
-            width: 100%;
-            height: 100%;
+            width: 58px;
+            height: 58px;
             object-fit: contain;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
         }
 
         .login-header h1 {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 700;
             color: #fff;
             margin: 0;
         }
 
         .login-header p {
-            font-size: 13px;
-            color: rgba(255, 255, 255, .65);
+            font-size: 11px;
+            color: rgba(255, 255, 255, .8);
             margin: 4px 0 0;
         }
 
         .login-body {
-            background: #fff;
-            padding: 32px;
+            background: rgba(255, 255, 255, 0.65);
+            padding: 24px;
         }
 
         .form-label {
@@ -83,21 +87,22 @@
 
         .form-control {
             border-radius: 8px;
-            border-color: #d1d5db;
+            border-color: rgba(209, 213, 219, 0.7);
+            background: rgba(255, 255, 255, 0.85);
             font-size: 14px;
             padding: 10px 14px;
             transition: border-color .2s, box-shadow .2s;
         }
 
         .form-control:focus {
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, .15);
+            border-color: #dc2626;
+            box-shadow: 0 0 0 3px rgba(220, 38, 38, .15);
         }
 
         .input-group-text {
-            background: #f9fafb;
+            background: rgba(249, 250, 251, 0.7);
             border-radius: 8px 0 0 8px !important;
-            border-color: #d1d5db;
+            border-color: rgba(209, 213, 219, 0.7);
             color: #6b7280;
         }
 
@@ -111,7 +116,7 @@
             font-weight: 600;
             font-size: 15px;
             border-radius: 8px;
-            background: linear-gradient(135deg, #3b82f6, #6366f1);
+            background: linear-gradient(135deg, #dc2626, #991b1b);
             border: none;
             color: #fff;
             transition: opacity .2s, transform .1s;
@@ -133,7 +138,7 @@
         }
 
         .forgot-link:hover {
-            color: #3b82f6;
+            color: #dc2626;
         }
 
         .invalid-feedback {
@@ -175,7 +180,8 @@
         {{-- Header --}}
         <div class="login-header">
             <div class="brand-icon">
-                <img src="{{ asset('img/logo.png') }}" alt="Logo SIPNONA">
+                <img src="{{ asset('img/polda.png') }}" alt="Logo Polda Lampung">
+                <img src="{{ asset('img/sdm.png') }}" alt="Logo SDM Polri">
             </div>
             <h1>SIPNONA</h1>
             <p>SISTEM INFORMASI PEGAWAI NON ASN</p>

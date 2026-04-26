@@ -6,7 +6,7 @@
 <style>
     /* ── Search Panel ── */
     .search-panel {
-        background: linear-gradient(135deg, #1e2a3b 0%, #2d3f57 100%);
+        background: linear-gradient(135deg, #111827 0%, #7f1d1d 100%);
         border-radius: 16px;
         padding: 28px 32px;
         margin-bottom: 28px;
@@ -26,7 +26,7 @@
     }
 
     .search-panel .panel-title i {
-        color: #60a5fa;
+        color: #fca5a5;
         font-size: 20px;
     }
 
@@ -47,9 +47,9 @@
     .search-input-wrapper input::placeholder { color: rgba(255,255,255,.45); }
     .search-input-wrapper input:focus {
         outline: none;
-        border-color: #3b82f6;
+        border-color: #dc2626;
         background: rgba(255,255,255,.12);
-        box-shadow: 0 0 0 3px rgba(59,130,246,.25);
+        box-shadow: 0 0 0 3px rgba(220,38,38,.25);
         color: #fff;
     }
 
@@ -85,12 +85,12 @@
 
     .satker-select:focus {
         outline: none;
-        border-color: #3b82f6;
+        border-color: #dc2626;
         background: rgba(255,255,255,.12);
-        box-shadow: 0 0 0 3px rgba(59,130,246,.25);
+        box-shadow: 0 0 0 3px rgba(220,38,38,.25);
     }
 
-    .satker-select option { background: #1e2a3b; color: #fff; }
+    .satker-select option { background: #111827; color: #fff; }
 
     .pendidikan-grid {
         display: flex;
@@ -121,10 +121,10 @@
     }
 
     .pend-chip input:checked + .chip-label {
-        background: #3b82f6;
-        border-color: #3b82f6;
+        background: #dc2626;
+        border-color: #dc2626;
         color: #fff;
-        box-shadow: 0 2px 10px rgba(59,130,246,.4);
+        box-shadow: 0 2px 10px rgba(220,38,38,.4);
     }
 
     .usia-input {
@@ -142,14 +142,14 @@
 
     .usia-input:focus {
         outline: none;
-        border-color: #3b82f6;
+        border-color: #dc2626;
         background: rgba(255,255,255,.12);
-        box-shadow: 0 0 0 3px rgba(59,130,246,.25);
+        box-shadow: 0 0 0 3px rgba(220,38,38,.25);
         color: #fff;
     }
 
     .btn-cari {
-        background: linear-gradient(135deg, #3b82f6, #6366f1);
+        background: linear-gradient(135deg, #dc2626, #991b1b);
         border: none;
         border-radius: 10px;
         color: #fff;
@@ -164,7 +164,7 @@
 
     .btn-cari:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(59,130,246,.45);
+        box-shadow: 0 6px 20px rgba(220,38,38,.45);
     }
 
     .btn-reset {
@@ -196,7 +196,7 @@
         border-radius: 8px 8px 0 0;
     }
     .result-tabs .nav-link.active {
-        color: #1e2a3b;
+        color: #111827;
         border-bottom-color: #fff;
     }
     .tab-content-box {
@@ -271,7 +271,7 @@
     
     /* ── Ekspor Tab ── */
     .ekspor-header {
-        background: #1e2a3b;
+        background: #111827;
         color: #fff;
         padding: 12px 20px;
         border-radius: 8px;
@@ -587,7 +587,7 @@
 
     {{-- Panel Kiri: Statistik Pegawai Non ASN --}}
     <div class="col-lg-6">
-        <div class="card border-0 shadow-sm" style="background:#1e2a3b; color:#fff; border-radius:14px;">
+        <div class="card border-0 shadow-sm" style="background:#111827; color:#fff; border-radius:14px;">
             <div class="card-body p-4">
 
                 {{-- Header --}}
@@ -599,7 +599,7 @@
                 </div>
 
                 {{-- Keseluruhan Pegawai --}}
-                <div class="mb-4 bg-light bg-opacity-10 p-3 rounded" style="border-left: 4px solid #3b82f6;">
+                <div class="mb-4 bg-light bg-opacity-10 p-3 rounded" style="border-left: 4px solid #dc2626;">
                     <div class="text-white-50 fw-semibold text-uppercase" style="font-size:12px; letter-spacing:0.5px;">Keseluruhan Pegawai</div>
                     <div class="d-flex align-items-center gap-3 mt-1">
                         <div class="d-flex align-items-center gap-2">
@@ -618,14 +618,14 @@
                     <div class="col-4">
                         <div class="text-white-50 text-uppercase fw-semibold" style="font-size:11px; letter-spacing:.5px;">Satker</div>
                         <div class="d-flex align-items-center justify-content-center gap-2 mt-1">
-                            <i class="bi bi-building-fill" style="color:#60a5fa; font-size:20px;"></i>
+                            <i class="bi bi-building-fill" style="color:#fca5a5; font-size:20px;"></i>
                             <span class="fw-bold" style="font-size:22px;">{{ number_format($pegawaiSatkerTotal) }}</span>
                         </div>
                     </div>
                     <div class="col-4 border-start border-secondary">
                         <div class="text-white-50 text-uppercase fw-semibold" style="font-size:11px; letter-spacing:.5px;">Pria</div>
                         <div class="d-flex align-items-center justify-content-center gap-2 mt-1">
-                            <i class="bi bi-gender-male" style="color:#60a5fa; font-size:18px;"></i>
+                            <i class="bi bi-gender-male" style="color:#fca5a5; font-size:18px;"></i>
                             <span class="fw-semibold" style="font-size:20px;">{{ number_format($pegawaiSatkerPria) }}</span>
                         </div>
                     </div>

@@ -27,7 +27,7 @@
         #sidebar {
             width: 260px;
             min-height: 100vh;
-            background: #1e2a3b;
+            background: #111827;
             display: flex;
             flex-direction: column;
             position: fixed;
@@ -112,9 +112,9 @@
         }
 
         #sidebar .nav-link.active {
-            background: linear-gradient(135deg, rgba(59,130,246,.25), rgba(99,102,241,.25));
-            color: #60a5fa;
-            border-left: 3px solid #3b82f6;
+            background: linear-gradient(135deg, rgba(220,38,38,.25), rgba(153,27,27,.25));
+            color: #fca5a5;
+            border-left: 3px solid #dc2626;
             margin-left: 10px;
             padding-left: 17px;
         }
@@ -135,7 +135,7 @@
         #sidebar .sidebar-footer .avatar {
             width: 36px;
             height: 36px;
-            background: linear-gradient(135deg, #3b82f6, #6366f1);
+            background: linear-gradient(135deg, #dc2626, #991b1b);
             border-radius: 50%;
             display: flex;
             align-items: center;
