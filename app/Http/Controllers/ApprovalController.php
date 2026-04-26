@@ -58,6 +58,11 @@ class ApprovalController extends Controller
                     'approved_at' => now(),
                 ]);
             });
+        } catch (\Illuminate\Database\QueryException $e) {
+            if ($e->getCode() == 23000) {
+                return back()->with('error', 'Gagal menyetujui: NIK sudah terdaftar di database. Silakan tolak permintaan ini.');
+            }
+            return back()->with('error', 'Gagal memproses permintaan: ' . $e->getMessage());
         } catch (\Throwable $e) {
             return back()->with('error', 'Gagal memproses permintaan: ' . $e->getMessage());
         }

@@ -12,10 +12,11 @@ use Maatwebsite\Excel\Concerns\WithColumnFormatting;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 
-class PegawaiExport implements FromQuery, WithHeadings, WithMapping, WithColumnFormatting, ShouldAutoSize
+class PegawaiExport implements FromQuery, WithHeadings, WithMapping
 {
     protected User $user;
     protected array $filters;
+    private int $rowNumber = 0;
 
     public function __construct(User $user, array $filters = [])
     {
@@ -62,41 +63,33 @@ class PegawaiExport implements FromQuery, WithHeadings, WithMapping, WithColumnF
     public function headings(): array
     {
         return [
+            'NO',
             'NAMA',
-            'TGL LAHIR',
-            'JK',
+            'JENIS KELAMIN',
             'PENDIDIKAN',
             'PRODI',
-            'TGL KERJA',
-            'SATKER',
-            'UNIT KERJA',
-            'STATUS',
-            'STATUS K-II',
-            'NOMOR K-II',
-            'KET',
+            'UMUR',
+            'SATKER/SATWIL',
+            'SUB/BAG',
         ];
     }
 
     public function map($pegawai): array
     {
+        $this->rowNumber++;
+        $umur = $pegawai->tgl_lahir ? \Carbon\Carbon::parse($pegawai->tgl_lahir)->age . ' Tahun' : '-';
+        $satkerInduk = $pegawai->satker?->level === 'sub' ? strtoupper($pegawai->satker?->parent?->nama_satker ?? '-') : strtoupper($pegawai->satker?->nama_satker ?? '-');
+        $subBag = $pegawai->satker?->level === 'sub' ? strtoupper($pegawai->satker?->nama_satker ?? '-') : '-';
+
         return [
+            $this->rowNumber,
             $pegawai->nama,
-            $pegawai->tgl_lahir ? $pegawai->tgl_lahir->format('d/m/Y') : '-',
             $pegawai->jenis_kelamin ?? '-',
             $pegawai->pendidikan ?? '-',
             $pegawai->prodi->nama ?? '-',
-            $pegawai->tgl_kerja ? $pegawai->tgl_kerja->format('d/m/Y') : '-',
-            optional($pegawai->satker)->parent->nama_satker ?? '-',
-            $pegawai->satker->nama_satker ?? '-',
-            $pegawai->status === 'aktif' ? 'Aktif' : 'Non Aktif',
-            $pegawai->status_k2,
-            $pegawai->nomor_k2 ?? '-',
-            $pegawai->keterangan ?? '',
+            $umur,
+            $satkerInduk,
+            $subBag,
         ];
-    }
-
-    public function columnFormats(): array
-    {
-        return [];
     }
 }
