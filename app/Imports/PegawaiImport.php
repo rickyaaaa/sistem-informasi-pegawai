@@ -29,6 +29,9 @@ class PegawaiImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnF
     /** @var array Pesan peringatan untuk baris yang dilewati (scope/satker tidak cocok) */
     private array $scopeWarnings = [];
 
+    /** @var array Nomor baris yang terdeteksi kosong (untuk difilter dari error) */
+    private array $emptyRows = [];
+
     public function __construct()
     {
         $user = Auth::user();
@@ -55,6 +58,14 @@ class PegawaiImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnF
     public function getScopeWarnings(): array
     {
         return $this->scopeWarnings;
+    }
+
+    /**
+     * Kembalikan daftar nomor baris kosong yang harus diabaikan dari error.
+     */
+    public function getEmptyRows(): array
+    {
+        return $this->emptyRows;
     }
 
     /**
@@ -209,6 +220,8 @@ class PegawaiImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnF
                  && empty(trim($data['unit_kerja'] ?? ''));
 
         if ($allEmpty) {
+            // Catat nomor baris ini agar error-nya bisa difilter di controller
+            $this->emptyRows[] = $index + 2; // +2 karena row 1 = heading
             // Kembalikan array kosong agar seluruh baris di-skip oleh SkipsOnFailure
             return array_map(fn() => null, $data);
         }

@@ -523,13 +523,16 @@ class PegawaiController extends Controller
         }
 
         // Collect row-level validation failures
-        $failures = $import->failures();
-        $errors   = [];
+        $failures  = $import->failures();
+        $emptyRows = $import->getEmptyRows(); // Baris kosong yang harus diabaikan
+        $errors    = [];
         foreach ($failures as $failure) {
             $row    = $failure->row();
             $column = $failure->attribute();
             // Skip internal helper field from showing to user
             if ($column === '__row_number') continue;
+            // Skip error dari baris kosong (sudah ditandai di PegawaiImport)
+            if (in_array($row, $emptyRows)) continue;
             foreach ($failure->errors() as $msg) {
                 $errors[] = "Baris ke-{$row} (kolom '{$column}'): {$msg}";
             }
