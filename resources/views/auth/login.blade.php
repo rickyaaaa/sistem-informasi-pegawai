@@ -28,8 +28,8 @@
 
         .login-card {
             width: 100%;
-            max-width: 340px;
-            margin-top: 18vh; /* Pushed down to reveal center logo */
+            max-width: 400px;
+            margin-top: 12vh; /* Adjusted for smaller screens */
             border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 16px;
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
@@ -41,7 +41,7 @@
 
         .login-header {
             background: linear-gradient(135deg, rgba(31, 41, 55, 0.55), rgba(153, 27, 27, 0.65));
-            padding: 14px 16px;
+            padding: 18px 24px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             display: flex;
             align-items: center;
@@ -49,8 +49,8 @@
         }
 
         .login-header img {
-            width: 42px;
-            height: 42px;
+            width: 48px;
+            height: 48px;
             object-fit: contain;
             filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
         }
