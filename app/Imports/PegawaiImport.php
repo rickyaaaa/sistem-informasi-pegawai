@@ -63,6 +63,11 @@ class PegawaiImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnF
      */
     public function model(array $row)
     {
+        // Lewati baris kosong (tidak ada NIK maupun NAMA)
+        if (empty($row['nik']) && empty($row['nama'])) {
+            return null;
+        }
+
         $nik = $this->sanitizeNik($row['nik'] ?? '');
 
         // Normalize unit_kerja: trim + uppercase agar toleran terhadap perbedaan penulisan di Excel
@@ -178,7 +183,7 @@ class PegawaiImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnF
             ->toArray();
 
         return [
-            'nik'        => ['required', 'string'],
+            'nik'        => ['required', 'string', 'regex:/^[0-9]+$/'],
             'nama'       => ['required', 'string', 'max:255'],
             'jk'         => ['required', Rule::in(['Pria', 'Wanita', 'Laki-laki', 'Perempuan', 'L', 'P'])],
             'pendidikan' => ['required', Rule::in(['SD', 'SMP', 'SMA/SMK', 'D3', 'S1', 'S1 Profesi', 'S2', 'S2 Profesi', 'S3'])],
@@ -190,13 +195,43 @@ class PegawaiImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnF
 
     /**
      * Normalize data sebelum validasi dijalankan.
-     * Mengubah unit_kerja menjadi UPPERCASE agar cocok dengan daftar validasi.
+     * - Mengabaikan baris yang seluruh kolomnya kosong (pengganti SkipsOnEmptyRows)
+     * - Mendeteksi NIK dalam format scientific notation (e.g. 1.23E+15)
+     * - Mengubah unit_kerja menjadi UPPERCASE agar cocok dengan daftar validasi
      */
     public function prepareForValidation($data, $index)
     {
+        // ── Skip baris kosong (pengganti SkipsOnEmptyRows) ──
+        // Cek apakah semua kolom penting kosong; jika ya, kosongkan seluruh data
+        // agar baris ini gagal validasi 'required' dan dilewati oleh SkipsOnFailure
+        $allEmpty = empty(trim($data['nik'] ?? ''))
+                 && empty(trim($data['nama'] ?? ''))
+                 && empty(trim($data['unit_kerja'] ?? ''));
+
+        if ($allEmpty) {
+            // Kembalikan array kosong agar seluruh baris di-skip oleh SkipsOnFailure
+            return array_map(fn() => null, $data);
+        }
+
+        // ── Deteksi NIK scientific notation (e.g. 1.23475869178262E+15) ──
+        if (isset($data['nik'])) {
+            $nikStr = trim((string) $data['nik']);
+
+            // Jika mengandung 'e' atau 'E' (tanda scientific notation), tandai sebagai rusak
+            if (preg_match('/[eE][+\-]/', $nikStr)) {
+                Log::warning("[PegawaiImport] Baris " . ($index + 2) . ": NIK terbaca scientific notation '{$nikStr}'");
+                // Set ke string khusus agar gagal validasi regex dengan pesan kustom
+                $data['nik'] = 'SCIENTIFIC_NOTATION_ERROR';
+            } else {
+                // Pastikan NIK selalu string (bukan float/int dari Excel)
+                $data['nik'] = (string) $nikStr;
+            }
+        }
+
         if (isset($data['unit_kerja'])) {
             $data['unit_kerja'] = strtoupper(trim($data['unit_kerja']));
         }
+
         // Simpan nomor baris untuk digunakan di pesan error scope
         $data['__row_number'] = $index + 2; // +2 karena row 1 = heading
         return $data;
@@ -206,6 +241,8 @@ class PegawaiImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnF
     {
         return [
             'nik.required'        => 'Kolom NIK wajib diisi.',
+            'nik.string'          => 'Kolom NIK harus berupa teks, bukan angka.',
+            'nik.regex'           => 'Format NIK terbaca sebagai angka logaritma. Pastikan kolom NIK diubah menjadi Text di Excel sebelum di-save ke CSV.',
             'nama.required'       => 'Kolom NAMA wajib diisi.',
             'jk.required'         => 'Kolom JK wajib diisi.',
             'jk.in'               => 'JK harus "Pria", "Wanita", "L", atau "P".',
