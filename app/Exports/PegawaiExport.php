@@ -44,11 +44,16 @@ class PegawaiExport implements FromQuery, WithHeadings, WithMapping, WithColumnF
         }
 
         if (!empty($this->filters['satker_id_search'])) {
-            $query->where('satker_id', $this->filters['satker_id_search']);
+            $satkerId = (int) $this->filters['satker_id_search'];
+            $allowedIds = Satker::where('id', $satkerId)
+                                ->orWhere('parent_id', $satkerId)
+                                ->pluck('id');
+            $query->whereIn('satker_id', $allowedIds);
         }
 
         if (!empty($this->filters['pendidikan_search'])) {
-            $query->where('pendidikan', $this->filters['pendidikan_search']);
+            $pendList = (array) $this->filters['pendidikan_search'];
+            $query->whereIn('pendidikan', $pendList);
         }
 
         return $query->orderBy('nama');
@@ -57,7 +62,6 @@ class PegawaiExport implements FromQuery, WithHeadings, WithMapping, WithColumnF
     public function headings(): array
     {
         return [
-            'NIK',
             'NAMA',
             'TGL LAHIR',
             'JK',
@@ -76,7 +80,6 @@ class PegawaiExport implements FromQuery, WithHeadings, WithMapping, WithColumnF
     public function map($pegawai): array
     {
         return [
-            $pegawai->nik,
             $pegawai->nama,
             $pegawai->tgl_lahir ? $pegawai->tgl_lahir->format('d/m/Y') : '-',
             $pegawai->jenis_kelamin ?? '-',
@@ -94,8 +97,6 @@ class PegawaiExport implements FromQuery, WithHeadings, WithMapping, WithColumnF
 
     public function columnFormats(): array
     {
-        return [
-            'A' => NumberFormat::FORMAT_TEXT, // NIK as text
-        ];
+        return [];
     }
 }

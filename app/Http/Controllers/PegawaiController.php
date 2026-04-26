@@ -495,8 +495,19 @@ class PegawaiController extends Controller
      */
     public function export(Request $request)
     {
+        $type = $request->input('type', 'excel');
+        $export = new PegawaiExport(auth()->user(), $request->all());
+
+        if ($type === 'pdf') {
+            return Excel::download(
+                $export,
+                'data_pegawai_' . date('Y-m-d') . '.pdf',
+                \Maatwebsite\Excel\Excel::DOMPDF
+            );
+        }
+
         return Excel::download(
-            new PegawaiExport(auth()->user(), $request->all()),
+            $export,
             'data_pegawai_' . date('Y-m-d') . '.xlsx'
         );
     }
