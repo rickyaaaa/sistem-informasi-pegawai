@@ -4,17 +4,17 @@
     <div class="col-12">
         <label class="form-label">Foto Profil</label>
         <div class="d-flex align-items-center gap-3">
-            @if(isset($pegawai) && $pegawai->foto)
-                <img src="{{ asset('storage/' . $pegawai->foto) }}"
-                     alt="Foto {{ $pegawai->nama }}"
-                     id="fotoPreview"
-                     style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid #e5e7eb;">
-            @else
-                <div id="fotoPreview"
-                     style="width:80px;height:80px;border-radius:50%;background:#e5e7eb;display:flex;align-items:center;justify-content:center;border:3px solid #e5e7eb;">
+            <div style="position: relative; width: 80px; height: 80px;">
+                <div id="fotoPreviewPlaceholder"
+                     style="width:80px;height:80px;border-radius:50%;background:#e5e7eb;display:{{ (isset($pegawai) && $pegawai->foto) ? 'none' : 'flex' }};align-items:center;justify-content:center;border:3px solid #e5e7eb; position: absolute; top: 0; left: 0;">
                     <i class="bi bi-person-fill" style="font-size:32px;color:#9ca3af;"></i>
                 </div>
-            @endif
+                <img src="{{ (isset($pegawai) && $pegawai->foto) ? asset('storage/' . $pegawai->foto) : '' }}"
+                     alt="Foto {{ $pegawai->nama ?? 'Profil' }}"
+                     id="fotoPreview"
+                     style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid #e5e7eb; position: absolute; top: 0; left: 0; display: {{ (isset($pegawai) && $pegawai->foto) ? 'block' : 'none' }};"
+                     onerror="this.style.display='none'; document.getElementById('fotoPreviewPlaceholder').style.display='flex';">
+            </div>
             <div>
                 <input type="file" name="foto" class="form-control form-control-sm" accept=".jpg,.jpeg,.png" id="fotoInput">
                 <small class="text-muted">Format: JPG, JPEG, PNG. Maks 2MB.</small>
@@ -250,6 +250,29 @@ document.addEventListener('DOMContentLoaded', function () {
     const statusK2Sel      = document.getElementById('status_k2');
     const nomorK2Wrap      = document.getElementById('nomor_k2_wrapper');
     const nomorK2Inp       = document.getElementById('nomor_k2');
+    const fotoInput        = document.getElementById('fotoInput');
+    const fotoPreview      = document.getElementById('fotoPreview');
+    const fotoPreviewPlaceholder = document.getElementById('fotoPreviewPlaceholder');
+
+    // ── Photo Preview ───────────────────────────────────────────
+    if (fotoInput) {
+        fotoInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    if (fotoPreview) {
+                        fotoPreview.src = event.target.result;
+                        fotoPreview.style.display = 'block';
+                    }
+                    if (fotoPreviewPlaceholder) {
+                        fotoPreviewPlaceholder.style.display = 'none';
+                    }
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+    }
 
     // ── Flatpickr Date Pickers ──────────────────────────────────
     const flatpickrConfig = {
