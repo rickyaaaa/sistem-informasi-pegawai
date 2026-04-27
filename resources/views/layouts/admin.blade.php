@@ -436,7 +436,7 @@
     {{-- Brand --}}
     <a href="{{ route('dashboard') }}" class="sidebar-brand">
         <div class="brand-icon">
-            <img src="{{ asset('img/LOGO.png') }}" alt="Logo SIPNONA">
+            <img src="{{ asset('img/LOGO.PNG') }}" alt="Logo SIPNONA">
         </div>
         <div class="brand-text">
             <h1>SIPNONA</h1>
