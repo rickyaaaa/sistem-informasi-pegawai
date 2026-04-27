@@ -40,7 +40,8 @@ return [
 
         'public' => [
             'driver' => 'local',
-            'root' => storage_path('app/public'),
+            // Gunakan absolute path ke folder public_html untuk hosting
+            'root' => env('APP_ENV') === 'local' ? storage_path('app/public') : base_path('../public_html/storage'),
             'url' => rtrim(env('APP_URL'), '/').'/storage',
             'visibility' => 'public',
             'throw' => false,
