@@ -116,6 +116,7 @@ class PegawaiController extends Controller
             'file_ktp' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:2048'],
             'file_kk' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:2048'],
             'file_ijazah' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:2048'],
+            'file_sprin' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:2048'],
         ]);
 
         // Handle "Lainnya" prodi — create new prodi if provided
@@ -178,6 +179,12 @@ class PegawaiController extends Controller
                 ->store('pegawai/ijazah', 'public');
         } else {
             unset($validated['file_ijazah']);
+        }
+        if ($request->hasFile('file_sprin')) {
+            $validated['file_sprin'] = $request->file('file_sprin')
+                ->store('pegawai/sprin', 'public');
+        } else {
+            unset($validated['file_sprin']);
         }
 
         // ── Admin Polda: direct insert ──────────────────────────
@@ -284,6 +291,7 @@ class PegawaiController extends Controller
             'file_ktp' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:2048'],
             'file_kk' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:2048'],
             'file_ijazah' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:2048'],
+            'file_sprin' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:2048'],
         ]);
 
         // Handle "Lainnya" prodi — create new prodi if provided
@@ -357,6 +365,15 @@ class PegawaiController extends Controller
                 ->store('pegawai/ijazah', 'public');
         } else {
             unset($validated['file_ijazah']);
+        }
+        if ($request->hasFile('file_sprin')) {
+            if ($pegawai->file_sprin && Storage::disk('public')->exists($pegawai->file_sprin)) {
+                Storage::disk('public')->delete($pegawai->file_sprin);
+            }
+            $validated['file_sprin'] = $request->file('file_sprin')
+                ->store('pegawai/sprin', 'public');
+        } else {
+            unset($validated['file_sprin']);
         }
 
         // Determine redirect target (back to show page if coming from there)
@@ -443,7 +460,7 @@ class PegawaiController extends Controller
 
         $this->authorizePegawaiAccess($pegawai);
 
-        if (!in_array($type, ['ktp', 'kk', 'ijazah'])) {
+        if (!in_array($type, ['ktp', 'kk', 'ijazah', 'sprin'])) {
             abort(404);
         }
 
@@ -451,6 +468,7 @@ class PegawaiController extends Controller
             'ktp' => $pegawai->file_ktp,
             'kk' => $pegawai->file_kk,
             'ijazah' => $pegawai->file_ijazah,
+            'sprin' => $pegawai->file_sprin,
             default => null,
         };
 
@@ -472,7 +490,7 @@ class PegawaiController extends Controller
 
         $this->authorizePegawaiAccess($pegawai);
 
-        if (!in_array($type, ['ktp', 'kk', 'ijazah'])) {
+        if (!in_array($type, ['ktp', 'kk', 'ijazah', 'sprin'])) {
             abort(404);
         }
 
@@ -480,6 +498,7 @@ class PegawaiController extends Controller
             'ktp' => $pegawai->file_ktp,
             'kk' => $pegawai->file_kk,
             'ijazah' => $pegawai->file_ijazah,
+            'sprin' => $pegawai->file_sprin,
             default => null,
         };
 
@@ -748,6 +767,9 @@ class PegawaiController extends Controller
         }
         if ($pegawai->file_ijazah && Storage::disk('public')->exists($pegawai->file_ijazah)) {
             Storage::disk('public')->delete($pegawai->file_ijazah);
+        }
+        if ($pegawai->file_sprin && Storage::disk('public')->exists($pegawai->file_sprin)) {
+            Storage::disk('public')->delete($pegawai->file_sprin);
         }
 
         $pegawai->forceDelete();

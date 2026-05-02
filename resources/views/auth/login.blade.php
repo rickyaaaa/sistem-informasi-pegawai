@@ -18,7 +18,7 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(rgba(30, 42, 59, 0.6), rgba(45, 63, 87, 0.6)), url('{{ asset('img/sipnona.png') }}') no-repeat center center fixed;
+            background: linear-gradient(rgba(30, 42, 59, 0.6), rgba(45, 63, 87, 0.6)), url('{{ asset('img/login.png') }}') no-repeat center center fixed;
             background-size: 100% 100%;
             min-height: 100vh;
             display: flex;
@@ -29,7 +29,8 @@
         .login-card {
             width: 100%;
             max-width: 400px;
-            margin-top: 12vh; /* Adjusted for smaller screens */
+            margin-top: 12vh;
+            /* Adjusted for smaller screens */
             border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 16px;
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
@@ -49,8 +50,8 @@
         }
 
         .login-header img {
-            width: 48px;
-            height: 48px;
+            width: 64px;
+            height: 64px;
             object-fit: contain;
             filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
         }
@@ -60,17 +61,17 @@
         }
 
         .login-header h1 {
-            font-size: 16px;
+            font-size: 24px;
             font-weight: 700;
             color: #fff;
             margin: 0;
-            letter-spacing: 0.5px;
+            letter-spacing: 1px;
         }
 
         .login-header p {
-            font-size: 9px;
+            font-size: 13px;
             color: rgba(255, 255, 255, .8);
-            margin: 2px 0 0;
+            margin: 4px 0 0;
         }
 
         .login-body {
@@ -101,7 +102,7 @@
             color: #4b5563;
             border-radius: 0;
         }
-        
+
         .input-group-custom .form-control:focus {
             box-shadow: none;
             background: transparent;
@@ -255,7 +256,8 @@
             </form>
 
             <div class="text-center mt-4 mb-0">
-                <img src="{{ asset('img/uti.png') }}" alt="Universitas Teknokrat Indonesia" style="height: 18px; margin-right: 6px; vertical-align: text-bottom;">
+                <img src="{{ asset('img/uti.png') }}" alt="Universitas Teknokrat Indonesia"
+                    style="height: 18px; margin-right: 6px; vertical-align: text-bottom;">
                 <span class="text-muted" style="font-size:12px;">
                     &copy; 2026 By Universitas Teknokrat Indonesia
                 </span>

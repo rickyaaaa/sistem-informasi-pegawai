@@ -247,6 +247,29 @@
                             </div>
                         </div>
                     </div>
+
+                    {{-- Sprin Awal / Kontrak --}}
+                    <div class="col-sm-6">
+                        <div class="d-flex align-items-center gap-3 p-3 rounded-3" style="background:#f8fafc;border:1px solid #e5e7eb;">
+                            <div style="width:42px;height:42px;border-radius:10px;background:#e0e7ff;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                <i class="bi bi-file-earmark-check text-primary" style="font-size:20px;"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="fw-medium" style="font-size:14px;">Sprin Awal / Kontrak</div>
+                                @if($pegawai->file_sprin)
+                                    <a href="{{ route('pegawai.file.show', [$pegawai, 'sprin']) }}" target="_blank" class="text-danger small text-decoration-none">
+                                        <i class="bi bi-eye me-1"></i> Lihat
+                                    </a>
+                                    <span class="mx-1 text-muted">|</span>
+                                    <a href="{{ route('pegawai.file.download', [$pegawai, 'sprin']) }}" class="text-danger small text-decoration-none">
+                                        <i class="bi bi-download me-1"></i> Unduh
+                                    </a>
+                                @else
+                                    <span class="text-muted small">Belum diupload</span>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

@@ -29,6 +29,7 @@ class Pegawai extends Model
         'file_ktp',
         'file_kk',
         'file_ijazah',
+        'file_sprin',
     ];
 
     protected function casts(): array

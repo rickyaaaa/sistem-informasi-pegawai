@@ -225,6 +225,19 @@
         @endisset
     </div>
 
+    {{-- Upload Sprin --}}
+    <div class="col-md-6">
+        <label class="form-label">Upload Sprin Awal / Kontrak Kerja</label>
+        <input type="file" name="file_sprin" class="form-control" accept=".pdf,.jpg,.jpeg,.png">
+        @isset($pegawai)
+            @if($pegawai->file_sprin)
+                <small class="text-muted">
+                    <a target="_blank" href="{{ asset('storage/'.$pegawai->file_sprin) }}">Lihat Sprin/Kontrak</a>
+                </small>
+            @endif
+        @endisset
+    </div>
+
 </div>
 
 
