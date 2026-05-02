@@ -9,9 +9,14 @@
         <h5 class="fw-bold mb-0">Daftar Pegawai</h5>
         <small class="text-muted">Total {{ $pegawais->total() }} pegawai terdaftar</small>
     </div>
-    <div class="d-flex gap-2">
-        <a href="{{ route('pegawai.export') }}" class="btn btn-success btn-sm">
-            <i class="bi bi-file-earmark-arrow-down me-1"></i> Export Excel
+    <div class="d-flex gap-2 flex-wrap">
+        <a href="{{ route('pegawai.export', array_merge(request()->only(['q','satker_id','pendidikan_search']))) }}"
+           class="btn btn-success btn-sm">
+            <i class="bi bi-file-earmark-excel me-1"></i> Export Excel
+        </a>
+        <a href="{{ route('pegawai.export', array_merge(request()->only(['q','satker_id','pendidikan_search']), ['type'=>'pdf'])) }}"
+           class="btn btn-outline-danger btn-sm">
+            <i class="bi bi-file-earmark-pdf me-1"></i> Download PDF
         </a>
         <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#importModal">
             <i class="bi bi-file-earmark-arrow-up me-1"></i> Import Excel

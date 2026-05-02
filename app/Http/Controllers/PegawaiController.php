@@ -14,6 +14,8 @@ use App\Exports\PegawaiTemplateExport;
 use App\Notifications\NewPegawaiRequestNotification;
 use Illuminate\Support\Facades\Notification;
 use Maatwebsite\Excel\Facades\Excel;
+use Dompdf\Dompdf;
+use Dompdf\Options;
 
 class PegawaiController extends Controller
 {
@@ -508,24 +510,86 @@ class PegawaiController extends Controller
     }
 
     /**
-     * Export Excel
+     * Export Excel / PDF
      */
     public function export(Request $request)
     {
         $type = $request->input('type', 'excel');
-        $export = new PegawaiExport(auth()->user(), $request->all());
+        $user = auth()->user();
 
         if ($type === 'pdf') {
-            // Meningkatkan limit memori dan waktu eksekusi khusus untuk pembuatan PDF dengan DomPDF
-            ini_set('memory_limit', '1024M');
+            ini_set('memory_limit', '512M');
             ini_set('max_execution_time', 300);
 
-            return Excel::download(
-                $export,
-                'data_pegawai_' . date('Y-m-d') . '.pdf',
-                \Maatwebsite\Excel\Excel::DOMPDF
-            );
+            // Build query (sama seperti PegawaiExport)
+            $query = Pegawai::query()->with(['satker.parent', 'prodi']);
+
+            if ($user->isAdminSatker()) {
+                $subIds = Satker::where('parent_id', $user->satker_id)
+                    ->orWhere('id', $user->satker_id)
+                    ->pluck('id');
+                $query->whereIn('satker_id', $subIds);
+            }
+
+            if ($request->filled('q')) {
+                $q = $request->input('q');
+                $query->where(function ($w) use ($q) {
+                    $w->where('nama', 'LIKE', "%{$q}%")
+                      ->orWhere('nik', 'LIKE', "%{$q}%");
+                });
+            }
+
+            if ($request->filled('satker_id')) {
+                $satkerId = (int) $request->input('satker_id');
+                $allowedIds = Satker::where('id', $satkerId)
+                    ->orWhere('parent_id', $satkerId)
+                    ->pluck('id');
+                $query->whereIn('satker_id', $allowedIds);
+            }
+
+            if ($request->filled('pendidikan_search')) {
+                $pendList = (array) $request->input('pendidikan_search');
+                $query->whereIn('pendidikan', $pendList);
+            }
+
+            $pegawais = $query->orderBy('nama')->get();
+
+            // Build filter info label
+            $filterParts = [];
+            if ($request->filled('q')) {
+                $filterParts[] = 'Kata kunci: "' . $request->input('q') . '"';
+            }
+            if ($request->filled('satker_id')) {
+                $satkerName = Satker::find((int) $request->input('satker_id'))?->nama_satker;
+                if ($satkerName) $filterParts[] = 'Satker: ' . $satkerName;
+            }
+            $filterInfo = implode(', ', $filterParts);
+
+            // Render HTML via Blade
+            $html = view('pegawai.pdf', compact('pegawais', 'filterInfo'))->render();
+
+            // Generate PDF dengan DomPDF
+            $options = new Options();
+            $options->set('isRemoteEnabled', false);
+            $options->set('isHtml5ParserEnabled', true);
+            $options->set('defaultFont', 'Arial');
+
+            $dompdf = new Dompdf($options);
+            $dompdf->loadHtml($html);
+            $dompdf->setPaper('A4', 'landscape');
+            $dompdf->render();
+
+            $filename = 'data_pegawai_' . date('Y-m-d') . '.pdf';
+
+            return response($dompdf->output(), 200, [
+                'Content-Type'        => 'application/pdf',
+                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+                'Cache-Control'       => 'no-store, no-cache',
+            ]);
         }
+
+        // Default: Excel
+        $export = new PegawaiExport($user, $request->all());
 
         return Excel::download(
             $export,
