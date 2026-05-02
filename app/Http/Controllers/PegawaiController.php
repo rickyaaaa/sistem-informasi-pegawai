@@ -476,9 +476,7 @@ class PegawaiController extends Controller
             abort(404);
         }
 
-        return response()->file(
-            storage_path('app/public/' . $path)
-        );
+        return Storage::disk('public')->response($path);
     }
 
     /**
@@ -506,7 +504,7 @@ class PegawaiController extends Controller
             abort(404);
         }
 
-        return response()->download(storage_path('app/public/' . $path));
+        return Storage::disk('public')->download($path);
     }
 
     /**
@@ -518,6 +516,10 @@ class PegawaiController extends Controller
         $export = new PegawaiExport(auth()->user(), $request->all());
 
         if ($type === 'pdf') {
+            // Meningkatkan limit memori dan waktu eksekusi khusus untuk pembuatan PDF dengan DomPDF
+            ini_set('memory_limit', '1024M');
+            ini_set('max_execution_time', 300);
+
             return Excel::download(
                 $export,
                 'data_pegawai_' . date('Y-m-d') . '.pdf',
